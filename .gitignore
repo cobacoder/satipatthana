@@ -6,3 +6,8 @@
 satipatthana-server-report.md
 prompt-server-report.md
 private/
+
+# Исходные аудиозаписи лекций: в репозиторий не попадают
+audio_eng/
+audio_ru/
+*.crdownload

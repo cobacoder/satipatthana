@@ -186,7 +186,6 @@ h1 {
 .ln .t { min-width: 0; }
 
 .tr { font-family: var(--f-ui); font-size: .8125rem; color: var(--muted); margin: 0; }
-.tr-l { display: block; }
 .hi { display: inline-grid; gap: .15rem; }
 
 /* ---------- page blocks ---------- */
@@ -260,7 +259,7 @@ h1 {
 /* rows that each point to one shared box */
 .fan { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(2.25rem, 4rem) minmax(0, 1fr); }
 .fan.fan-v { grid-template-columns: minmax(0, 1fr) minmax(2.25rem, 5rem) max-content; }
-.fan > .fl { grid-column: 1; border: var(--lw) solid var(--rule); border-top: 0; background: var(--sheet); }
+.fan > .fl { grid-column: 1; border: var(--lw) solid var(--rule); border-top: 0; }
 .fan > .fl.first { border-top: var(--lw) solid var(--rule); }
 .fan > .fa { grid-column: 2; align-self: center; }
 .fan > .fan-d { display: none; }
@@ -422,8 +421,7 @@ h1 {
 .pl-text { font-family: var(--f-text); font-size: 1.05rem; line-height: 1.35; }
 .script-dev .pl-text { font-family: var(--f-deva); }
 .pl-tr { display: grid; gap: 3px; font-size: .84rem; line-height: 1.4; }
-.pl-tr p { margin: 0; display: grid; grid-template-columns: 1.9rem minmax(0, 1fr); gap: .4rem; }
-.pl-tag { font-size: .66rem; letter-spacing: .08em; color: var(--bar-muted); padding-top: .22em; }
+.pl-tr p { margin: 0; }
 .pl-meta { font-size: .75rem; color: var(--bar-muted); font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; gap: 0 .9em; }
 .pl-track { height: 3px; background: var(--bar-track); }
 .pl-prog { display: block; height: 100%; width: 0; background: var(--bar-accent); }
@@ -431,7 +429,7 @@ h1 {
 @media (max-width: 700px) {
   body { font-size: 16px; padding-block: 16px 32px; }
   .sheet { border: 0; padding: 4px 0 0; background: transparent; gap: 1.75rem; }
-  .box, .fan > .fl { background: transparent; }
+  .box { background: transparent; }
   .play-all { margin-left: 0; }
   .d-only { display: none; }
   .m-only { display: flex; }
@@ -469,7 +467,7 @@ h1 {
 <body>
 <div class="sheet">
   <header class="top">
-    <p class="eyebrow">DN 22 · <span id="page-label"></span></p>
+    <p class="eyebrow"><span id="page-label"></span></p>
     <h1>Mahāsatipaṭṭhāna Sutta</h1>
     <p class="credit" data-i18n="credit"></p>
     <div class="tools">
@@ -547,6 +545,7 @@ h1 {
 <script src="js/pages/p10.js"></script>
 <script src="js/pages/p11.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/config.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

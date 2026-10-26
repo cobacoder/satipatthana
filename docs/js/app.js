@@ -445,40 +445,44 @@
     });
   }
 
+  // Pages shown on the site are listed in js/config.js; ?all in the address shows every page
+  const ALL = Array.from({ length: NPAGES }, (_, i) => i + 1).filter(n => PAGES[n]);
+  const SHOWN = new URLSearchParams(location.search).has('all') ? ALL
+    : (window.PUBLISHED_PAGES || ALL).filter(n => PAGES[n]);
   const main = $('pages');
-  for (let n = 1; n <= NPAGES; n++) {
+  SHOWN.forEach(n => {
     const sec = mk('section', 'page');
     sec.id = 'p' + n;
     sec.dataset.page = n;
     sec.hidden = true;
-    if (PAGES[n]) renderBlocks(PAGES[n].blocks, sec);
+    renderBlocks(PAGES[n].blocks, sec);
     main.append(sec);
-  }
+  });
 
   // ---------- interface text ----------
   const UI = {
     en: {
-      page: 'Page {n} of 11', pages: 'Pages',
+      page: 'Dīgha Nikāya 22 · Page {n} of 11', pages: 'Pages',
       credit: 'Tables by Sri Bednath, Vipassana Acharya, Nepal, with every repetition of the sutta left out. Each line opens its audio explanation.',
       script: 'Script', translation: 'Language',
       playPage: 'Play page', pausePage: 'Pause',
-      hint: 'Tap any line of the sutta to hear its explanation and see it translated into English and Russian. In the matrices, tap a cell to put its term into the [ ] brackets.',
+      hint: 'Tap any line of the sutta to hear its explanation and see its translation. In the matrices, tap a cell to put its term into the [ ] brackets.',
       demo: 'Demo: audio not linked yet', lineOf: 'Line {n} of {N}', cell: 'Matrix cell',
       orig: 'Original page (scan)',
-      note: 'Pali checked against the Chaṭṭha Saṅgāyana text of DN 22; misprints in the brochure are corrected.',
+      note: 'Pali checked against the Chaṭṭha Saṅgāyana edition of the Dīgha Nikāya 22, the 22nd sutta of the Long Discourses; misprints in the brochure are corrected.',
       prev: 'Previous line', next: 'Next line', play: 'Play', pause: 'Pause', close: 'Close player',
       prevPage: 'Previous page', nextPage: 'Next page',
       tIast: 'Latin with diacritics (IAST)', tPlain: 'Latin without diacritics', tCyr: 'Cyrillic', tCyrs: 'Cyrillic with diacritics', tDev: 'Original Devanagari'
     },
     ru: {
-      page: 'Страница {n} из 11', pages: 'Страницы',
+      page: 'Дигха-никая 22 · Страница {n} из 11', pages: 'Страницы',
       credit: 'Схемы Шри Беднатха, ачарьи Випассаны из Непала, без повторов, которые есть в сутте. По каждой строке открывается аудиопояснение.',
       script: 'Письмо', translation: 'Язык',
       playPage: 'Слушать страницу', pausePage: 'Пауза',
-      hint: 'Нажмите на любую строку сутты, чтобы услышать объяснение и увидеть перевод на русский и английский. В матрицах нажмите на ячейку, чтобы подставить её термин в скобки [ ].',
+      hint: 'Нажмите на любую строку сутты, чтобы услышать объяснение и увидеть перевод. В матрицах нажмите на ячейку, чтобы подставить её термин в скобки [ ].',
       demo: 'Демо: аудио ещё не подключено', lineOf: 'Строка {n} из {N}', cell: 'Ячейка матрицы',
       orig: 'Оригинал страницы (скан)',
-      note: 'Текст на пали сверен с изданием Чаттха Сангаяна (DN 22); опечатки брошюры исправлены.',
+      note: 'Текст на пали сверен с изданием Чаттха Сангаяна: Дигха-никая 22, двадцать вторая сутта Собрания длинных наставлений. Опечатки брошюры исправлены.',
       prev: 'Предыдущая строка', next: 'Следующая строка', play: 'Слушать', pause: 'Пауза', close: 'Закрыть плеер',
       prevPage: 'Предыдущая страница', nextPage: 'Следующая страница',
       tIast: 'Латиница с диакритикой (IAST)', tPlain: 'Латиница без диакритики', tCyr: 'Кириллица', tCyrs: 'Кириллица с диакритикой', tDev: 'Оригинал на деванагари'
@@ -505,13 +509,9 @@
     document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = L[el.dataset.i18nTitle]; });
     document.querySelectorAll('[data-i18n-label]').forEach(el => { el.setAttribute('aria-label', L[el.dataset.i18nLabel]); });
     document.querySelectorAll('.ui').forEach(el => { el.textContent = el.dataset[lang]; });
-    const order = lang === 'ru' ? ['ru', 'en'] : ['en', 'ru'];
     document.querySelectorAll('.tr').forEach(el => {
-      el.replaceChildren(...order.filter(code => el.dataset[code]).map(code => {
-        const s = mk('span', 'tr-l', el.dataset[code]);
-        s.lang = code;
-        return s;
-      }));
+      el.textContent = el.dataset[lang] || el.dataset.en;
+      el.lang = el.dataset[lang] ? lang : 'en';
     });
     $('page-label').textContent = L.page.replace('{n}', page);
     updatePlayer();
@@ -519,15 +519,17 @@
 
   // ---------- pages ----------
   const pager = $('pager');
-  for (let n = 1; n <= NPAGES; n++) {
+  SHOWN.forEach(n => {
     const a = mk('a', 'pg', String(n));
     a.href = '#p' + n;
     a.dataset.page = n;
     pager.append(a);
-  }
+  });
+  pager.closest('.pager-row').hidden = SHOWN.length < 2;
+  $('pg-prev').closest('.pg-nav').hidden = SHOWN.length < 2;
 
   function showPage(n, scroll) {
-    if (!PAGES[n] && n !== 1) n = 1;
+    if (!SHOWN.includes(n)) n = SHOWN[0];
     closePlayer();
     page = n;
     document.querySelectorAll('.page').forEach(s => { s.hidden = +s.dataset.page !== n; });
@@ -540,8 +542,8 @@
     $('page-label').textContent = UI[lang].page.replace('{n}', n);
     $('scan').src = 'scans/page-' + String(n).padStart(2, '0') + '.jpg';
     $('scan').alt = 'Scan of page ' + n + ' of the printed brochure, in Devanagari';
-    $('pg-prev').disabled = n === 1;
-    $('pg-next').disabled = n === NPAGES;
+    $('pg-prev').disabled = SHOWN.indexOf(n) === 0;
+    $('pg-next').disabled = SHOWN.indexOf(n) === SHOWN.length - 1;
     if (location.hash !== '#p' + n) history.replaceState(null, '', '#p' + n);
     if (scroll) window.scrollTo({ top: 0, behavior: 'auto' });
   }
@@ -672,12 +674,10 @@
     if (!cur) return;
     $('pl-text').textContent = unitText(cur);
     const tr = UNITS.get(cur.dataset.id);
-    const order = lang === 'ru' ? [['ru', 'ru'], ['en', 'en']] : [['en', 'en'], ['ru', 'ru']];
-    $('pl-tr').replaceChildren(...(tr ? order.filter(([code]) => tr[code]).map(([code]) => {
-      const txt = mk('span', null, tr[code]);
-      txt.lang = code;
-      return mk('p', null, [mk('span', 'pl-tag', code.toUpperCase()), txt]);
-    }) : []));
+    const trText = tr && (tr[lang] || tr.en);
+    const trP = trText ? mk('p', null, trText) : null;
+    if (trP) trP.lang = tr[lang] ? lang : 'en';
+    $('pl-tr').replaceChildren(...(trP ? [trP] : []));
     const si = seq.indexOf(cur);
     $('pl-count').textContent = si >= 0 ? L.lineOf.replace('{n}', si + 1).replace('{N}', seq.length) : L.cell;
     $('pl-note').textContent = cueFor(cur) ? '' : L.demo;
@@ -738,15 +738,15 @@
     e.preventDefault();
     showPage(+a.dataset.page, true);
   });
-  $('pg-prev').addEventListener('click', () => showPage(page - 1, true));
-  $('pg-next').addEventListener('click', () => showPage(page + 1, true));
+  $('pg-prev').addEventListener('click', () => showPage(SHOWN[SHOWN.indexOf(page) - 1], true));
+  $('pg-next').addEventListener('click', () => showPage(SHOWN[SHOWN.indexOf(page) + 1], true));
   window.addEventListener('hashchange', () => {
     const m = location.hash.match(/^#p(\d+)$/);
     if (m && +m[1] !== page) showPage(+m[1], true);
   });
 
   const m = location.hash.match(/^#p(\d+)$/);
-  showPage(m ? Math.min(NPAGES, Math.max(1, +m[1])) : 1, false);
+  showPage(m ? +m[1] : SHOWN[0], false);
   renderLang();
   renderText();
 })();
