@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Рабочие материалы: в открытый репозиторий не попадают
+*.docx
+satipatthana-server-report.md
+prompt-server-report.md
+private/
