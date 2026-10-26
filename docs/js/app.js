@@ -1,7 +1,6 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const SOURCES = window.SOURCES || {};
   const CUES = window.CUES || {};
   const PAGES = window.PAGES || [];
   const NPAGES = 11;
@@ -472,6 +471,10 @@
       note: 'Pali checked against the Chaṭṭha Saṅgāyana edition of the Dīgha Nikāya 22, the 22nd sutta of the Long Discourses; misprints in the brochure are corrected.',
       prev: 'Previous line', next: 'Next line', play: 'Play', pause: 'Pause', close: 'Close player',
       prevPage: 'Previous page', nextPage: 'Next page',
+      loginTitle: 'Recordings for old students',
+      loginText: 'The explanations are talks from the Satipaṭṭhāna course. Enter the login and password for old students, the same as on discourses.dhamma.org.',
+      loginName: 'Login', loginPass: 'Password', loginGo: 'Open recordings', loginWait: 'Checking…', cancel: 'Cancel',
+      loginErr: 'This login and password did not work. Check them and try again.',
       tIast: 'Latin with diacritics (IAST)', tPlain: 'Latin without diacritics', tCyr: 'Cyrillic', tCyrs: 'Cyrillic with diacritics', tDev: 'Original Devanagari'
     },
     ru: {
@@ -485,6 +488,10 @@
       note: 'Текст на пали сверен с изданием Чаттха Сангаяна: Дигха-никая 22, двадцать вторая сутта Собрания длинных наставлений. Опечатки брошюры исправлены.',
       prev: 'Предыдущая строка', next: 'Следующая строка', play: 'Слушать', pause: 'Пауза', close: 'Закрыть плеер',
       prevPage: 'Предыдущая страница', nextPage: 'Следующая страница',
+      loginTitle: 'Записи для старых студентов',
+      loginText: 'Пояснения — это беседы с курса Сатипаттханы. Введите логин и пароль для старых студентов, такие же, как на discourses.dhamma.org.',
+      loginName: 'Логин', loginPass: 'Пароль', loginGo: 'Открыть записи', loginWait: 'Проверяю…', cancel: 'Отмена',
+      loginErr: 'Логин или пароль не подошли. Проверьте их и попробуйте ещё раз.',
       tIast: 'Латиница с диакритикой (IAST)', tPlain: 'Латиница без диакритики', tCyr: 'Кириллица', tCyrs: 'Кириллица с диакритикой', tDev: 'Оригинал на деванагари'
     }
   };
@@ -554,13 +561,31 @@
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ICON_PLAY = 'M4 2v12l10-6z', ICON_PAUSE = 'M3 2h3.5v12H3zM9.5 2H13v12H9.5z';
 
-  let cur = null, playing = false, pageMode = false, t0 = 0, done = 0, dur = 0, raf = 0;
+  let cur = null, playing = false, pageMode = false, t0 = 0, done = 0, dur = 0, raf = 0, playToken = 0;
+
+  // ---------- recordings: the links are encrypted in js/audio-lock.js and open after the old-student login ----------
+  const LOCK = window.AUDIO_LOCK;
+  let LINKS = null;
+  try {
+    const saved = JSON.parse(localStorage.getItem('mspm-links'));
+    if (saved && LOCK && saved.salt === LOCK.salt) LINKS = saved.links;
+  } catch (e) {}
+  const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function unlock(login, password) {
+    const enc = new TextEncoder();
+    const base = await crypto.subtle.importKey('raw', enc.encode(login.trim().toLowerCase() + ':' + password), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(LOCK.salt), iterations: LOCK.iter, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(LOCK.iv) }, key, b64(LOCK.data));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
 
   const toSec = v => typeof v === 'number' ? v : String(v).split(':').map(Number).reduce((a, b) => a * 60 + b, 0);
+  const rawCue = el => el && (CUES[lang] || {})[el.dataset.id];
   function cueFor(el) {
-    const c = el && CUES[el.dataset.id];
-    if (!c || !SOURCES[c[0]]) return null;
-    return { src: SOURCES[c[0]], start: toSec(c[1]), end: toSec(c[2]) };
+    const c = rawCue(el), src = c && LINKS && LINKS[lang] && LINKS[lang][c[0]];
+    if (!src) return null;
+    return { src, start: toSec(c[1]), end: toSec(c[2]) };
   }
   function unitText(el) {
     if (el.dataset.full) return translit(el.dataset.full, 'pi', null, true);
@@ -584,6 +609,7 @@
 
   function start(el, scroll) {
     if (!el) return;
+    if (rawCue(el) && !LINKS && LOCK) { askLogin(el, scroll); return; }
     cancelAnimationFrame(raf);
     audio.pause();
     cur = el;
@@ -593,10 +619,17 @@
     if (scroll) el.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
     const c = cueFor(el);
     if (c) {
+      const token = ++playToken;
       if (audio.dataset.src !== c.src) { audio.src = c.src; audio.dataset.src = c.src; }
-      audio.currentTime = c.start;
+      if (audio.readyState >= 1) audio.currentTime = c.start;
+      else {
+        // play() is called right away, inside the tap; the first moments stay muted until the seek lands
+        audio.muted = true;
+        audio.addEventListener('loadedmetadata', () => { if (token === playToken) audio.currentTime = c.start; }, { once: true });
+        audio.addEventListener('seeked', () => { audio.muted = false; }, { once: true });
+      }
+      audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
       dur = c.end - c.start;
-      audio.play().catch(() => {});
     } else dur = demoDur(el);
     done = 0;
     t0 = performance.now();
@@ -618,7 +651,8 @@
 
   function pause() {
     if (!playing) return;
-    if (cueFor(cur)) audio.pause(); else done = elapsed();
+    done = elapsed();
+    audio.pause();
     playing = false;
     cancelAnimationFrame(raf);
     updatePlayer();
@@ -691,6 +725,36 @@
     else start(el, false);
   }
 
+  // login dialog: asks once, then the links stay in this browser
+  let pending = null;
+  function askLogin(el, scroll) {
+    pending = { el, scroll };
+    $('login-err').hidden = true;
+    $('login-dialog').showModal();
+    $('login-name').focus();
+  }
+  $('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = $('login-go');
+    btn.disabled = true;
+    btn.textContent = UI[lang].loginWait;
+    try {
+      LINKS = await unlock($('login-name').value, $('login-pass').value);
+      try { localStorage.setItem('mspm-links', JSON.stringify({ salt: LOCK.salt, links: LINKS })); } catch (err) {}
+      $('login-pass').value = '';
+      $('login-dialog').close();
+      if (pending) start(pending.el, pending.scroll);
+      pending = null;
+    } catch (err) {
+      $('login-err').hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = UI[lang].loginGo;
+    }
+  });
+  $('login-cancel').addEventListener('click', () => { $('login-dialog').close(); });
+  $('login-dialog').addEventListener('close', () => { if (pending) { pending = null; pageMode = false; updatePlayer(); } });
+
   document.addEventListener('click', e => {
     const ref = e.target.closest('.ref');
     if (ref) {
@@ -730,7 +794,13 @@
   });
   document.querySelectorAll('input[name="lang"]').forEach(r => {
     r.checked = r.value === lang;
-    r.addEventListener('change', () => { lang = r.value; store.set('mspm-lang', lang); renderLang(); });
+    r.addEventListener('change', () => {
+      lang = r.value;
+      store.set('mspm-lang', lang);
+      renderLang();
+      // the talk follows the language: restart the current line in the other recording
+      if (cur && playing && rawCue(cur)) { pause(); start(cur, false); }
+    });
   });
   pager.addEventListener('click', e => {
     const a = e.target.closest('.pg');

@@ -26,6 +26,7 @@
   --bar-track: #3A3833;
   --bar-accent: #E9AA50;
   --bar-on-accent: #1F1E1A;
+  --err: #A3341B;
   --f-text: "Gentium Book Plus", "Noto Serif", "Times New Roman", serif;
   --f-deva: "Tiro Devanagari Sanskrit", "Noto Serif Devanagari", "Kohinoor Devanagari", serif;
   --f-ui: "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -38,7 +39,7 @@
     --paper: #11110F; --sheet: #191916; --ink: #ECE9E1; --rule: #C8C3B5; --muted: #A29D91;
     --hair: #34322C; --ochre: #E7A84E; --mark: #5B4613; --hover: #25221A;
     --bar: #2A2924; --bar-fg: #ECE9E1; --bar-muted: #A29D91; --bar-track: #45433C;
-    --bar-accent: #E9AA50; --bar-on-accent: #1F1E1A;
+    --bar-accent: #E9AA50; --bar-on-accent: #1F1E1A; --err: #F08A6E;
     color-scheme: dark;
   }
 }
@@ -46,7 +47,7 @@
   --paper: #11110F; --sheet: #191916; --ink: #ECE9E1; --rule: #C8C3B5; --muted: #A29D91;
   --hair: #34322C; --ochre: #E7A84E; --mark: #5B4613; --hover: #25221A;
   --bar: #2A2924; --bar-fg: #ECE9E1; --bar-muted: #A29D91; --bar-track: #45433C;
-  --bar-accent: #E9AA50; --bar-on-accent: #1F1E1A;
+  --bar-accent: #E9AA50; --bar-on-accent: #1F1E1A; --err: #F08A6E;
   color-scheme: dark;
 }
 
@@ -386,6 +387,36 @@ h1 {
 .scan summary:focus-visible { outline: 2px solid var(--ochre); outline-offset: 2px; }
 .scan img { display: block; margin-top: .9rem; width: 100%; max-width: 560px; height: auto; border: 1px solid var(--hair); }
 
+/* ---------- login for the recordings ---------- */
+.login {
+  border: 1px solid var(--rule);
+  background: var(--sheet);
+  color: var(--ink);
+  padding: 1.5rem;
+  width: min(26rem, calc(100vw - 32px));
+  font-family: var(--f-ui);
+  font-size: .875rem;
+}
+.login::backdrop { background: rgba(20, 18, 14, .5); }
+.login form { display: grid; gap: .55rem; }
+.login h2 { margin: 0 0 .2rem; font-family: var(--f-text); font-size: 1.3rem; text-wrap: balance; }
+.login p { margin: 0 0 .3rem; color: var(--muted); }
+.login label { font-weight: 600; }
+.login input {
+  font: inherit;
+  font-size: 1rem;
+  padding: .5rem .6rem;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+.login input:focus-visible { outline: 2px solid var(--ochre); outline-offset: 1px; }
+.login .login-err { color: var(--err); }
+.login-btns { display: flex; justify-content: flex-end; gap: .5rem; margin-top: .5rem; }
+.pg-btn.main { background: var(--ink); color: var(--sheet); }
+.pg-btn.main:hover { background: var(--ink); opacity: .9; }
+
 /* ---------- player ---------- */
 .player {
   position: fixed;
@@ -544,7 +575,24 @@ h1 {
 <script src="js/pages/p09.js"></script>
 <script src="js/pages/p10.js"></script>
 <script src="js/pages/p11.js"></script>
+<dialog class="login" id="login-dialog" aria-labelledby="login-title">
+  <form id="login-form">
+    <h2 id="login-title" data-i18n="loginTitle"></h2>
+    <p data-i18n="loginText"></p>
+    <label for="login-name" data-i18n="loginName"></label>
+    <input id="login-name" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="login-pass" data-i18n="loginPass"></label>
+    <input id="login-pass" name="password" type="password" autocomplete="current-password" required>
+    <p class="login-err" id="login-err" role="alert" data-i18n="loginErr" hidden></p>
+    <div class="login-btns">
+      <button class="pg-btn" id="login-cancel" type="button" data-i18n="cancel"></button>
+      <button class="pg-btn main" id="login-go" type="submit" data-i18n="loginGo"></button>
+    </div>
+  </form>
+</dialog>
+
 <script src="js/audio.js"></script>
+<script src="js/audio-lock.js"></script>
 <script src="js/config.js"></script>
 <script src="js/app.js"></script>
 </body>
