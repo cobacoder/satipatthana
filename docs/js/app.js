@@ -466,7 +466,7 @@
       script: 'Script', translation: 'Language',
       playPage: 'Play page', pausePage: 'Pause',
       hint: 'Tap any line of the sutta to hear its explanation and see its translation. In the matrices, tap a cell to put its term into the [ ] brackets.',
-      demo: 'Demo: audio not linked yet', lineOf: 'Line {n} of {N}', cell: 'Matrix cell',
+      demo: 'No audio for this line yet', lineOf: 'Line {n} of {N}', cell: 'Matrix cell',
       orig: 'Original page (scan)',
       note: 'Pali checked against the Chaṭṭha Saṅgāyana edition of the Dīgha Nikāya 22, the 22nd sutta of the Long Discourses; misprints in the brochure are corrected.',
       prev: 'Previous line', next: 'Next line', play: 'Play', pause: 'Pause', close: 'Close player',
@@ -483,7 +483,7 @@
       script: 'Письмо', translation: 'Язык',
       playPage: 'Слушать страницу', pausePage: 'Пауза',
       hint: 'Нажмите на любую строку сутты, чтобы услышать объяснение и увидеть перевод. В матрицах нажмите на ячейку, чтобы подставить её термин в скобки [ ].',
-      demo: 'Демо: аудио ещё не подключено', lineOf: 'Строка {n} из {N}', cell: 'Ячейка матрицы',
+      demo: 'Для этой строки аудио пока нет', lineOf: 'Строка {n} из {N}', cell: 'Ячейка матрицы',
       orig: 'Оригинал страницы (скан)',
       note: 'Текст на пали сверен с изданием Чаттха Сангаяна: Дигха-никая 22, двадцать вторая сутта Собрания длинных наставлений. Опечатки брошюры исправлены.',
       prev: 'Предыдущая строка', next: 'Следующая строка', play: 'Слушать', pause: 'Пауза', close: 'Закрыть плеер',
@@ -562,6 +562,8 @@
   const ICON_PLAY = 'M4 2v12l10-6z', ICON_PAUSE = 'M3 2h3.5v12H3zM9.5 2H13v12H9.5z';
 
   let cur = null, playing = false, pageMode = false, t0 = 0, done = 0, dur = 0, raf = 0, playToken = 0;
+  // cue of the current line: its pieces of the recordings, played one after another; heard = pieces played in page mode
+  let cue = null, cueLang = null, part = 0, heard = [];
 
   // ---------- recordings: the links are encrypted in js/audio-lock.js and open after the old-student login ----------
   const LOCK = window.AUDIO_LOCK;
@@ -582,10 +584,23 @@
 
   const toSec = v => typeof v === 'number' ? v : String(v).split(':').map(Number).reduce((a, b) => a * 60 + b, 0);
   const rawCue = el => el && (CUES[lang] || {})[el.dataset.id];
+  // a cue is [day, start, end] or a list of such pieces: the Pali read out, then the explanation, possibly from different places
   function cueFor(el) {
-    const c = rawCue(el), src = c && LINKS && LINKS[lang] && LINKS[lang][c[0]];
-    if (!src) return null;
-    return { src, start: toSec(c[1]), end: toSec(c[2]) };
+    const c = rawCue(el), links = LINKS && LINKS[lang];
+    if (!c || !links) return null;
+    const parts = (Array.isArray(c[0]) ? c : [c]).map(p => ({ src: links[p[0]], start: toSec(p[1]), end: toSec(p[2]) }));
+    if (parts.some(p => !p.src)) return null;
+    let at = 0;
+    parts.forEach(p => { p.at = at; at += p.end - p.start; });
+    return { parts, dur: at };
+  }
+  // page mode skips a line whose pieces were all heard already (the same passage explains several lines)
+  // and, once this language has any audio, a line that has none yet
+  const isHeard = c => c.parts.every(p => heard.some(h => h.src === p.src && h.start <= p.start + 1 && h.end >= p.end - 1));
+  function skipped(el) {
+    if (!rawCue(el)) return Object.keys(CUES[lang] || {}).length > 0;
+    const c = cueFor(el);
+    return !!c && isHeard(c);
   }
   function unitText(el) {
     if (el.dataset.full) return translit(el.dataset.full, 'pi', null, true);
@@ -597,9 +612,25 @@
   const fmt = s => { s = Math.max(0, s); const m = Math.floor(s / 60), r = Math.floor(s % 60); return m + ':' + String(r).padStart(2, '0'); };
 
   function elapsed() {
-    const c = cueFor(cur);
-    if (c) return Math.max(0, audio.currentTime - c.start);
+    if (cue) {
+      const p = cue.parts[part];
+      return p.at + Math.min(p.end - p.start, Math.max(0, audio.currentTime - p.start));
+    }
     return playing ? done + (performance.now() - t0) / 1000 : done;
+  }
+
+  function playPart(i) {
+    const token = ++playToken, p = cue.parts[i];
+    part = i;
+    if (audio.dataset.src !== p.src) { audio.src = p.src; audio.dataset.src = p.src; }
+    if (audio.readyState >= 1) audio.currentTime = p.start;
+    else {
+      // play() is called right away, inside the tap; the first moments stay muted until the seek lands
+      audio.muted = true;
+      audio.addEventListener('loadedmetadata', () => { if (token === playToken) audio.currentTime = p.start; }, { once: true });
+      audio.addEventListener('seeked', () => { audio.muted = false; }, { once: true });
+    }
+    audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
   }
 
   function mark(el) {
@@ -617,19 +648,12 @@
     $('player').hidden = false;
     document.body.classList.add('has-player');
     if (scroll) el.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
-    const c = cueFor(el);
-    if (c) {
-      const token = ++playToken;
-      if (audio.dataset.src !== c.src) { audio.src = c.src; audio.dataset.src = c.src; }
-      if (audio.readyState >= 1) audio.currentTime = c.start;
-      else {
-        // play() is called right away, inside the tap; the first moments stay muted until the seek lands
-        audio.muted = true;
-        audio.addEventListener('loadedmetadata', () => { if (token === playToken) audio.currentTime = c.start; }, { once: true });
-        audio.addEventListener('seeked', () => { audio.muted = false; }, { once: true });
-      }
-      audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
-      dur = c.end - c.start;
+    cue = cueFor(el);
+    cueLang = lang;
+    if (cue) {
+      if (pageMode) heard.push(...cue.parts);
+      playPart(0);
+      dur = cue.dur;
     } else dur = demoDur(el);
     done = 0;
     t0 = performance.now();
@@ -638,16 +662,21 @@
     updatePlayer();
   }
 
+  // moves to the next piece and ends the line; runs on animation frames and, for a hidden tab, on the audio's timeupdate
+  function tick() {
+    if (!playing) return;
+    if (cue && part < cue.parts.length - 1 && audio.currentTime >= cue.parts[part].end) playPart(part + 1);
+    const e = elapsed();
+    setProgress(e);
+    if (e >= dur) finished();
+  }
   function loop() {
     cancelAnimationFrame(raf);
-    const step = () => {
-      const e = elapsed();
-      setProgress(e);
-      if (e >= dur) { finished(); return; }
-      if (playing) raf = requestAnimationFrame(step);
-    };
+    const step = () => { tick(); if (playing) raf = requestAnimationFrame(step); };
     raf = requestAnimationFrame(step);
   }
+  audio.addEventListener('timeupdate', tick);
+  setInterval(() => { if (document.hidden && !cue) tick(); }, 500);
 
   function pause() {
     if (!playing) return;
@@ -660,32 +689,35 @@
 
   function resume() {
     if (playing || !cur) return;
-    if (elapsed() >= dur) { start(cur, false); return; }
-    if (cueFor(cur)) audio.play().catch(() => {}); else t0 = performance.now();
+    if (elapsed() >= dur || cueLang !== lang) { start(cur, false); return; }
+    if (cue) audio.play().catch(() => {}); else t0 = performance.now();
     playing = true;
     loop();
     updatePlayer();
   }
 
   // the next or previous line in reading order; matrix cells are skipped
-  function neighbor(dir) {
-    const i = lines.indexOf(cur);
+  function neighborOf(el, dir) {
+    const i = lines.indexOf(el);
     for (let k = i + dir; k >= 0 && k < lines.length; k += dir) if (!lines[k].classList.contains('cell')) return lines[k];
     return null;
   }
+  const neighbor = dir => neighborOf(cur, dir);
 
   function finished() {
     playing = false;
     audio.pause();
     setProgress(dur);
-    const nx = pageMode && neighbor(1);
+    let nx = pageMode && neighbor(1);
+    while (nx && skipped(nx)) nx = neighborOf(nx, 1);
     if (nx) start(nx, true);
-    else { pageMode = false; updatePlayer(); }
+    else { pageMode = false; heard = []; updatePlayer(); }
   }
 
   function closePlayer() {
     pause();
     pageMode = false;
+    heard = [];
     mark(null);
     cur = null;
     $('player').hidden = true;
@@ -776,9 +808,12 @@
   $('play-all').addEventListener('click', () => {
     if (pageMode && playing) pause();
     else if (pageMode && cur) resume();
-    else { pageMode = true; start(seq[0], true); }
+    else { pageMode = true; heard = []; start(seq.find(l => !skipped(l)) || seq[0], true); }
   });
-  audio.addEventListener('ended', () => { if (playing) finished(); });
+  audio.addEventListener('ended', () => {
+    if (!playing) return;
+    if (cue && part < cue.parts.length - 1) playPart(part + 1); else finished();
+  });
 
   if ('ResizeObserver' in window) {
     new ResizeObserver(() => {
