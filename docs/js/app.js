@@ -469,7 +469,8 @@
       demo: 'No audio for this line yet', lineOf: 'Line {n} of {N}', cell: 'Matrix cell',
       orig: 'Original page (scan)',
       note: 'Pali checked against the Chaṭṭha Saṅgāyana edition of the Dīgha Nikāya 22, the 22nd sutta of the Long Discourses; misprints in the brochure are corrected.',
-      prev: 'Previous line', next: 'Next line', play: 'Play', pause: 'Pause', close: 'Close player',
+      prev: 'Previous line', next: 'Next line', play: 'Play', pause: 'Pause', close: 'Close player', seek: 'Position in the explanation',
+      line0: 'Line 0 · the title',
       prevPage: 'Previous page', nextPage: 'Next page',
       loginTitle: 'Recordings for old students',
       loginText: 'The explanations are talks from the Satipaṭṭhāna course. Enter the login and password for old students, the same as on discourses.dhamma.org.',
@@ -486,7 +487,8 @@
       demo: 'Для этой строки аудио пока нет', lineOf: 'Строка {n} из {N}', cell: 'Ячейка матрицы',
       orig: 'Оригинал страницы (скан)',
       note: 'Текст на пали сверен с изданием Чаттха Сангаяна: Дигха-никая 22, двадцать вторая сутта Собрания длинных наставлений. Опечатки брошюры исправлены.',
-      prev: 'Предыдущая строка', next: 'Следующая строка', play: 'Слушать', pause: 'Пауза', close: 'Закрыть плеер',
+      prev: 'Предыдущая строка', next: 'Следующая строка', play: 'Слушать', pause: 'Пауза', close: 'Закрыть плеер', seek: 'Место в объяснении',
+      line0: 'Строка 0 · название',
       prevPage: 'Предыдущая страница', nextPage: 'Следующая страница',
       loginTitle: 'Записи для старых студентов',
       loginText: 'Пояснения — это беседы с курса Сатипаттханы. Введите логин и пароль для старых студентов, такие же, как на discourses.dhamma.org.',
@@ -563,7 +565,10 @@
 
   let cur = null, playing = false, pageMode = false, t0 = 0, done = 0, dur = 0, raf = 0, playToken = 0;
   // cue of the current line: its pieces of the recordings, played one after another; heard = pieces played in page mode
-  let cue = null, cueLang = null, part = 0, heard = [];
+  let cue = null, cueLang = null, part = 0, heard = [], dragging = false;
+  // line 0: the title, explained at the start of the reading; it stands before 1.01 of page 1
+  const titleLn = $('title-ln');
+  UNITS.set('0', { en: 'The Great Discourse on the Establishing of Awareness', ru: 'Большая беседа об установлении осознанности' });
 
   // ---------- recordings: the links are encrypted in js/audio-lock.js and open after the old-student login ----------
   const LOCK = window.AUDIO_LOCK;
@@ -619,22 +624,36 @@
     return playing ? done + (performance.now() - t0) / 1000 : done;
   }
 
-  function playPart(i) {
-    const token = ++playToken, p = cue.parts[i];
+  // goes to piece i, `off` seconds into it; when paused, only moves there
+  function playPart(i, off = 0, play = true) {
+    const token = ++playToken, p = cue.parts[i], at = p.start + off;
     part = i;
     if (audio.dataset.src !== p.src) { audio.src = p.src; audio.dataset.src = p.src; }
-    if (audio.readyState >= 1) audio.currentTime = p.start;
+    if (audio.readyState >= 1) audio.currentTime = at;
     else {
       // play() is called right away, inside the tap; the first moments stay muted until the seek lands
       audio.muted = true;
-      audio.addEventListener('loadedmetadata', () => { if (token === playToken) audio.currentTime = p.start; }, { once: true });
+      audio.addEventListener('loadedmetadata', () => { if (token === playToken) audio.currentTime = at; }, { once: true });
       audio.addEventListener('seeked', () => { audio.muted = false; }, { once: true });
     }
-    audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
+    if (play) audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
+  }
+
+  // seeking inside the line: e seconds from its start, across its pieces
+  function seekTo(e) {
+    if (!cur || !dur) return;
+    if (cueLang !== lang) { start(cur, false); if (!playing) return; }
+    e = Math.max(0, Math.min(dur - 0.1, e));
+    if (cue) {
+      let i = cue.parts.findIndex(p => e < p.at + p.end - p.start);
+      if (i < 0) i = cue.parts.length - 1;
+      playPart(i, e - cue.parts[i].at, playing);
+    } else { done = e; t0 = performance.now(); }
+    setProgress(e);
   }
 
   function mark(el) {
-    lines.forEach(l => { l.classList.remove('on'); l.removeAttribute('aria-current'); });
+    [titleLn, ...lines].forEach(l => { l.classList.remove('on'); l.removeAttribute('aria-current'); });
     if (el) { el.classList.add('on'); el.setAttribute('aria-current', 'true'); }
   }
 
@@ -700,7 +719,7 @@
   function neighborOf(el, dir) {
     const i = lines.indexOf(el);
     for (let k = i + dir; k >= 0 && k < lines.length; k += dir) if (!lines[k].classList.contains('cell')) return lines[k];
-    return null;
+    return dir < 0 && page === 1 && el !== titleLn ? titleLn : null;
   }
   const neighbor = dir => neighborOf(cur, dir);
 
@@ -725,10 +744,17 @@
     updatePlayer();
   }
 
-  function setProgress(e) {
-    $('pl-prog').style.width = (dur ? Math.min(100, e / dur * 100) : 0) + '%';
+  function drawProgress(e) {
+    const pct = (dur ? Math.min(100, e / dur * 100) : 0) + '%';
+    $('pl-prog').style.width = pct;
+    $('pl-thumb').style.left = pct;
     $('pl-time').textContent = fmt(e) + ' / ' + fmt(dur);
+    const s = $('pl-seek');
+    s.setAttribute('aria-valuemax', Math.round(dur));
+    s.setAttribute('aria-valuenow', Math.round(e));
+    s.setAttribute('aria-valuetext', fmt(e) + ' / ' + fmt(dur));
   }
+  function setProgress(e) { if (!dragging) drawProgress(e); }
 
   function updatePlayer() {
     const L = UI[lang];
@@ -745,7 +771,7 @@
     if (trP) trP.lang = tr[lang] ? lang : 'en';
     $('pl-tr').replaceChildren(...(trP ? [trP] : []));
     const si = seq.indexOf(cur);
-    $('pl-count').textContent = si >= 0 ? L.lineOf.replace('{n}', si + 1).replace('{N}', seq.length) : L.cell;
+    $('pl-count').textContent = cur === titleLn ? L.line0 : si >= 0 ? L.lineOf.replace('{n}', si + 1).replace('{N}', seq.length) : L.cell;
     $('pl-note').textContent = cueFor(cur) ? '' : L.demo;
     $('pl-prev').disabled = !neighbor(-1);
     $('pl-next').disabled = !neighbor(1);
@@ -795,20 +821,41 @@
       return;
     }
     const ln = e.target.closest('.ln');
-    if (ln && main.contains(ln)) activate(ln);
+    if (ln && (main.contains(ln) || ln === titleLn)) activate(ln);
   });
-  main.addEventListener('keydown', e => {
+  const lineKeys = e => {
     const ln = e.target.closest('span.ln');
     if (ln && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); ln.click(); }
-  });
+  };
+  main.addEventListener('keydown', lineKeys);
+  titleLn.addEventListener('keydown', lineKeys);
   $('pl-toggle').addEventListener('click', () => playing ? pause() : resume());
   $('pl-prev').addEventListener('click', () => start(neighbor(-1), true));
   $('pl-next').addEventListener('click', () => start(neighbor(1), true));
   $('pl-close').addEventListener('click', closePlayer);
+  // the progress bar is a slider: drag or tap to move, arrows ±5 s, Page Up/Down ±30 s
+  const seekBar = $('pl-seek');
+  const atPointer = ev => { const r = seekBar.querySelector('.pl-track').getBoundingClientRect(); return Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)) * dur; };
+  seekBar.addEventListener('pointerdown', ev => {
+    if (!cur || !dur) return;
+    dragging = true;
+    seekBar.setPointerCapture(ev.pointerId);
+    drawProgress(atPointer(ev));
+  });
+  seekBar.addEventListener('pointermove', ev => { if (dragging) drawProgress(atPointer(ev)); });
+  const endDrag = ev => { if (!dragging) return; dragging = false; seekTo(atPointer(ev)); };
+  seekBar.addEventListener('pointerup', endDrag);
+  seekBar.addEventListener('pointercancel', () => { dragging = false; setProgress(elapsed()); });
+  seekBar.addEventListener('keydown', ev => {
+    const step = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5, PageDown: -30, PageUp: 30 }[ev.key];
+    if (step == null && ev.key !== 'Home' && ev.key !== 'End') return;
+    ev.preventDefault();
+    seekTo(ev.key === 'Home' ? 0 : ev.key === 'End' ? dur : elapsed() + step);
+  });
   $('play-all').addEventListener('click', () => {
     if (pageMode && playing) pause();
     else if (pageMode && cur) resume();
-    else { pageMode = true; heard = []; start(seq.find(l => !skipped(l)) || seq[0], true); }
+    else { pageMode = true; heard = []; start([...(page === 1 ? [titleLn] : []), ...seq].find(l => !skipped(l)) || seq[0], true); }
   });
   audio.addEventListener('ended', () => {
     if (!playing) return;
