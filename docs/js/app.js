@@ -1,6 +1,8 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  // the version from this script's link (tools/stamp-version.mjs), passed on to the scripts loaded later
+  const VER = document.currentScript ? new URL(document.currentScript.src).searchParams.get('v') : null;
   const CUES = window.CUES || {};
   const PAGES = window.PAGES || [];
   const NPAGES = 11;
@@ -125,8 +127,10 @@
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   };
   const SCRIPTS = ['iast', 'plain', 'cyr', 'cyrs', 'dev'];
-  let script = SCRIPTS.includes(store.get('mspm-script')) ? store.get('mspm-script') : 'iast';
+  // switching the language also switches the script to its usual one: IAST for English, Cyrillic with diacritics for Russian
+  const LANG_SCRIPT = { en: 'iast', ru: 'cyrs' };
   let lang = ['en', 'ru'].includes(store.get('mspm-lang')) ? store.get('mspm-lang') : 'en';
+  let script = SCRIPTS.includes(store.get('mspm-script')) ? store.get('mspm-script') : LANG_SCRIPT[lang];
   const SCRIPT_LANG = { iast: 'Latn', plain: 'Latn', cyr: 'Cyrl', cyrs: 'Cyrl', dev: 'Deva' };
 
   const conv = (ia, hi) => script === 'iast' ? ia : script === 'plain' ? toPlain(ia, hi) : toCyr(ia, hi, script === 'cyrs');
@@ -933,6 +937,10 @@
     r.addEventListener('change', () => {
       lang = r.value;
       store.set('mspm-lang', lang);
+      script = LANG_SCRIPT[lang];
+      store.set('mspm-script', script);
+      document.querySelectorAll('input[name="script"]').forEach(s => { s.checked = s.value === script; });
+      renderText();
       renderLang();
       // the talk follows the language: restart the current line in the other recording
       if (cur && playing && rawCue(cur)) { pause(); start(cur, false); }
@@ -971,7 +979,7 @@
   if (new URLSearchParams(location.search).has('review')) {
     for (const src of ['js/audio-auto.js', 'js/review.js']) {
       const s = document.createElement('script');
-      s.src = src;
+      s.src = src + (VER ? '?v=' + VER : '');
       s.async = false;
       document.body.append(s);
     }

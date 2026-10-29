@@ -677,7 +677,9 @@
 .rv-bar { position: sticky; top: 0; z-index: 15; display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: center;
   margin: 0 0 1rem; padding: .5rem .75rem; background: var(--bar); color: var(--bar-fg); font: .8125rem/1.4 var(--f-ui); }
 .rv-bar b { color: var(--bar-accent); }
-.rv-bar .rv-link, .rv-bar .rv-b { color: inherit; }
+.rv-bar .rv-link { color: inherit; }
+.rv-bar .rv-b { background: var(--bar-accent); color: var(--bar-on-accent); border-color: var(--bar-accent); font-weight: 600; }
+.rv-bar .rv-b:hover { background: var(--bar-accent); filter: brightness(1.06); }
 .rv-err { color: var(--err); }
 .rv-bar .rv-err { color: #F08A6E; }
 body.rv .ln[data-rv="ok"] { box-shadow: inset 4px 0 0 var(--rv-ok); }
