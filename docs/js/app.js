@@ -558,8 +558,10 @@
   }
 
   // ---------- player ----------
-  const audio = new Audio();
-  audio.preload = 'none';
+  // two players: while one plays, the other holds the line's next recording ready, so a switch between days has no gap
+  const players = [new Audio(), new Audio()];
+  players.forEach(a => { a.preload = 'none'; });
+  let audio = players[0], spare = players[1];
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ICON_PLAY = 'M4 2v12l10-6z', ICON_PAUSE = 'M3 2h3.5v12H3zM9.5 2H13v12H9.5z';
 
@@ -628,6 +630,12 @@
   function playPart(i, off = 0, play = true) {
     const token = ++playToken, p = cue.parts[i], at = p.start + off;
     part = i;
+    if (audio.dataset.src !== p.src && spare.dataset.src === p.src) {
+      // the spare player already holds this recording: swap the players
+      audio.pause();
+      [audio, spare] = [spare, audio];
+      audio.muted = false;
+    }
     if (audio.dataset.src !== p.src) { audio.src = p.src; audio.dataset.src = p.src; }
     if (audio.readyState >= 1) audio.currentTime = at;
     else {
@@ -636,7 +644,23 @@
       audio.addEventListener('loadedmetadata', () => { if (token === playToken) audio.currentTime = at; }, { once: true });
       audio.addEventListener('seeked', () => { audio.muted = false; }, { once: true });
     }
-    if (play) audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
+    if (play) {
+      audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
+      warm(i);
+    }
+  }
+
+  // loads the next piece from another recording into the spare player, at its start
+  function warm(i) {
+    const p = cue.parts.slice(i + 1).find(q => q.src !== audio.dataset.src), s = spare;
+    if (!p) return;
+    if (s.dataset.src !== p.src) { s.src = p.src; s.dataset.src = p.src; }
+    s.preload = 'auto';
+    const seek = () => { if (s !== audio && s.dataset.src === p.src) s.currentTime = p.start; };
+    if (s.readyState >= 1) seek(); else s.addEventListener('loadedmetadata', seek, { once: true });
+    // a muted play-and-pause, inside the tap, lets phone browsers start this player later without another tap
+    s.muted = true;
+    s.play().then(() => { if (s !== audio) s.pause(); }, () => {});
   }
 
   // seeking inside the line: e seconds from its start, across its pieces
@@ -694,7 +718,7 @@
     const step = () => { tick(); if (playing) raf = requestAnimationFrame(step); };
     raf = requestAnimationFrame(step);
   }
-  audio.addEventListener('timeupdate', tick);
+  players.forEach(a => a.addEventListener('timeupdate', () => { if (a === audio) tick(); }));
   setInterval(() => { if (document.hidden && !cue) tick(); }, 500);
 
   function pause() {
@@ -857,10 +881,10 @@
     else if (pageMode && cur) resume();
     else { pageMode = true; heard = []; start([...(page === 1 ? [titleLn] : []), ...seq].find(l => !skipped(l)) || seq[0], true); }
   });
-  audio.addEventListener('ended', () => {
-    if (!playing) return;
+  players.forEach(a => a.addEventListener('ended', () => {
+    if (a !== audio || !playing) return;
     if (cue && part < cue.parts.length - 1) playPart(part + 1); else finished();
-  });
+  }));
 
   if ('ResizeObserver' in window) {
     new ResizeObserver(() => {
