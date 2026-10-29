@@ -86,6 +86,18 @@
   const LOCAL = 'mspm-review-local';
   const key = (l, id) => l + '|' + id;
 
+  // The sheet turns text that looks like a number or a date into one: 1.07 became 1 July, 1.20 became 1.2.
+  // So a line id goes there as L1.07 and other text with a leading apostrophe (the sheet keeps it as text);
+  // rows saved before that are read back as their line.
+  const MONTHS = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+  function lineOf(v) {
+    v = String(v).replace(/^L/, '');
+    if (/^\d+\.\d$/.test(v)) return v + '0';
+    const m = v.match(/^\w{3} (\w{3}) (\d{2}) \d{4}/);
+    return m && MONTHS[m[1]] ? +m[2] + '.' + String(MONTHS[m[1]]).padStart(2, '0') : v;
+  }
+  const asText = v => v ? "'" + v : '';
+
   const savedCue = (l, id) => {
     const r = latest[key(l, id)];
     if (r) { try { return JSON.parse(r.cue || '[]'); } catch (e) {} }
@@ -117,7 +129,7 @@
         const res = await fetch(backend.url + '?key=' + encodeURIComponent(backend.key) + '&t=' + Date.now());
         const d = await res.json();
         if (d.error) throw new Error(d.error);
-        rows = d.rows;
+        rows = d.rows.map(r => ({ ...r, line: lineOf(r.line) }));
       } else rows = JSON.parse(store.get(LOCAL) || '[]');
       loadErr = '';
       loadedAt = new Date();
@@ -146,7 +158,9 @@
     message('Сохраняю…');
     try {
       if (backend) {
-        const res = await fetch(backend.url, { method: 'POST', body: JSON.stringify({ key: backend.key, ...row }) });
+        const sent = { key: backend.key, name: asText(row.name), lang: row.lang, line: 'L' + row.line, status: asText(row.status),
+          cue: asText(row.cue), comment: asText(row.comment), action: asText(row.action), client: asText(row.client) };
+        const res = await fetch(backend.url, { method: 'POST', body: JSON.stringify(sent) });
         const r = await res.json();
         if (!r.ok) throw new Error(r.error || 'save');
         row.time = r.time;

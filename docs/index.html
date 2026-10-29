@@ -467,7 +467,8 @@ h1 .title-ln { display: inline; width: auto; padding: 0 .12em; margin-left: -.12
 .pl-tr p { margin: 0; }
 .pl-meta { font-size: .75rem; color: var(--bar-muted); font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; gap: 0 .9em; }
 .pl-seek { padding: 7px 6px; cursor: pointer; touch-action: none; border-radius: 4px; }
-.pl-seek:focus-visible { outline: 2px solid var(--bar-accent); outline-offset: 0; }
+.pl-seek:focus-visible { outline: none; }
+.pl-seek:focus-visible .pl-thumb { box-shadow: 0 0 0 5px color-mix(in srgb, var(--bar-accent) 35%, transparent); }
 .pl-track { display: block; position: relative; height: 4px; border-radius: 2px; background: var(--bar-track); }
 .pl-prog { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--bar-accent); }
 .pl-thumb { position: absolute; top: 50%; left: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--bar-accent); }

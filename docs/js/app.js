@@ -470,7 +470,7 @@
       orig: 'Original page (scan)',
       note: 'Pali checked against the Chaṭṭha Saṅgāyana edition of the Dīgha Nikāya 22, the 22nd sutta of the Long Discourses; misprints in the brochure are corrected.',
       prev: 'Previous line', next: 'Next line', play: 'Play', pause: 'Pause', close: 'Close player', seek: 'Position in the explanation',
-      line0: 'Line 0 · the title',
+      line0: 'Line 0 · the title', loadErr: 'The recording did not load. Tap play again.',
       prevPage: 'Previous page', nextPage: 'Next page',
       loginTitle: 'Recordings for old students',
       loginText: 'The explanations are talks from the Satipaṭṭhāna course. Enter the login and password for old students, the same as on discourses.dhamma.org.',
@@ -488,7 +488,7 @@
       orig: 'Оригинал страницы (скан)',
       note: 'Текст на пали сверен с изданием Чаттха Сангаяна: Дигха-никая 22, двадцать вторая сутта Собрания длинных наставлений. Опечатки брошюры исправлены.',
       prev: 'Предыдущая строка', next: 'Следующая строка', play: 'Слушать', pause: 'Пауза', close: 'Закрыть плеер', seek: 'Место в объяснении',
-      line0: 'Строка 0 · название',
+      line0: 'Строка 0 · название', loadErr: 'Запись не загрузилась. Нажмите «Слушать» ещё раз.',
       prevPage: 'Предыдущая страница', nextPage: 'Следующая страница',
       loginTitle: 'Записи для старых студентов',
       loginText: 'Пояснения — это беседы с курса Сатипаттханы. Введите логин и пароль для старых студентов, такие же, как на discourses.dhamma.org.',
@@ -636,7 +636,8 @@
       [audio, spare] = [spare, audio];
       audio.muted = false;
     }
-    if (audio.dataset.src !== p.src) { audio.src = p.src; audio.dataset.src = p.src; }
+    // a player that failed to load (a network hiccup) loads the recording again
+    if (audio.dataset.src !== p.src || audio.error) { audio.src = p.src; audio.dataset.src = p.src; }
     if (audio.readyState >= 1) audio.currentTime = at;
     else {
       // play() is called right away, inside the tap; the first moments stay muted until the seek lands
@@ -661,7 +662,7 @@
   function warm(i) {
     const p = cue.parts.slice(i + 1).find(q => q.src !== audio.dataset.src), s = spare;
     if (!p) return;
-    if (s.dataset.src !== p.src) { s.src = p.src; s.dataset.src = p.src; }
+    if (s.dataset.src !== p.src || s.error) { s.src = p.src; s.dataset.src = p.src; }
     s.preload = 'auto';
     const seek = () => { if (s !== audio && s.dataset.src === p.src) s.currentTime = p.start; };
     if (s.readyState >= 1) seek(); else s.addEventListener('loadedmetadata', seek, { once: true });
@@ -729,7 +730,13 @@
   players.forEach(a => a.addEventListener('timeupdate', () => { if (a === audio) tick(); }));
   players.forEach(a => {
     a.addEventListener('waiting', () => { if (a === audio && playing) loading(true); });
-    for (const ev of ['playing', 'pause', 'error']) a.addEventListener(ev, () => { if (a === audio) loading(false); });
+    for (const ev of ['playing', 'pause']) a.addEventListener(ev, () => { if (a === audio) loading(false); });
+    a.addEventListener('error', () => {
+      if (a !== audio) return;
+      loading(false);
+      if (playing) { playing = false; cancelAnimationFrame(raf); updatePlayer(); }
+      $('pl-note').textContent = UI[lang].loadErr;
+    });
   });
   setInterval(() => { if (document.hidden && !cue) tick(); }, 500);
 
@@ -745,7 +752,9 @@
   function resume() {
     if (playing || !cur) return;
     if (elapsed() >= dur || cueLang !== lang) { start(cur, false); return; }
-    if (cue) audio.play().catch(() => {}); else t0 = performance.now();
+    if (cue && audio.error) playPart(part, Math.max(0, elapsed() - cue.parts[part].at));
+    else if (cue) audio.play().catch(() => {});
+    else t0 = performance.now();
     playing = true;
     loop();
     updatePlayer();
@@ -888,6 +897,14 @@
     if (step == null && ev.key !== 'Home' && ev.key !== 'End') return;
     ev.preventDefault();
     seekTo(ev.key === 'Home' ? 0 : ev.key === 'End' ? dur : elapsed() + step);
+  });
+  // ← → move ±5 s (with Shift ±30 s) from anywhere while a line is open, unless the focus is in a field
+  document.addEventListener('keydown', ev => {
+    if (!cur || ev.defaultPrevented || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+    if (ev.target.closest && ev.target.closest('input, textarea, select, [contenteditable], dialog, #pl-seek')) return;
+    ev.preventDefault();
+    seekTo(elapsed() + (ev.key === 'ArrowRight' ? 1 : -1) * (ev.shiftKey ? 30 : 5));
   });
   $('play-all').addEventListener('click', () => {
     if (pageMode && playing) pause();
