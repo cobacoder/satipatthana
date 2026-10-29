@@ -448,6 +448,17 @@ h1 .title-ln { display: inline; width: auto; padding: 0 .12em; margin-left: -.12
 .ib svg { width: 16px; height: 16px; fill: currentColor; }
 .ib.main { width: 44px; height: 44px; background: var(--bar-accent); color: var(--bar-on-accent); }
 .ib.main:hover { background: var(--bar-accent); filter: brightness(1.08); }
+.ib.main { position: relative; }
+.ib.main.loading::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--bar-track);
+  border-top-color: var(--bar-accent);
+  animation: pl-spin .8s linear infinite;
+}
+@keyframes pl-spin { to { transform: rotate(1turn); } }
 .ib:disabled { opacity: .35; cursor: default; }
 .pl-info { min-width: 0; display: grid; gap: 6px; max-height: min(46vh, 340px); overflow-y: auto; }
 .pl-text { font-family: var(--f-text); font-size: 1.05rem; line-height: 1.35; }
@@ -496,6 +507,7 @@ h1 .title-ln { display: inline; width: auto; padding: 0 .12em; margin-left: -.12
 }
 @media (prefers-reduced-motion: reduce) {
   .ln { transition: none; }
+  .ib.main.loading::after { animation-duration: 2.4s; }
 }
 </style>
 </head>

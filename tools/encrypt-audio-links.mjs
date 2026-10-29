@@ -18,6 +18,8 @@ for (const lang of ['en', 'ru']) {
   links[lang] = {};
   for (const [day, uuid] of Object.entries(list[lang] || {})) links[lang][day] = list.base + uuid + '.mp3';
 }
+// review mode: { "url": "<Apps Script /exec URL>", "key": "<review key>" } (tools/review-sheet.gs)
+if (list.review) links.review = list.review;
 
 // Same derivation as the browser: PBKDF2-SHA-256 over "login:password", then AES-256-GCM
 const ITER = 250000;

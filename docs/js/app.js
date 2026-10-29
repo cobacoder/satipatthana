@@ -595,7 +595,7 @@
   function cueFor(el) {
     const c = rawCue(el), links = LINKS && LINKS[lang];
     if (!c || !links) return null;
-    const parts = (Array.isArray(c[0]) ? c : [c]).map(p => ({ src: links[p[0]], start: toSec(p[1]), end: toSec(p[2]) }));
+    const parts = (Array.isArray(c[0]) ? c : [c]).map(p => ({ day: p[0], src: links[p[0]], start: toSec(p[1]), end: toSec(p[2]) }));
     if (parts.some(p => !p.src)) return null;
     let at = 0;
     parts.forEach(p => { p.at = at; at += p.end - p.start; });
@@ -645,9 +645,16 @@
       audio.addEventListener('seeked', () => { audio.muted = false; }, { once: true });
     }
     if (play) {
-      audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; updatePlayer(); } });
+      if (audio.readyState < 3) loading(true);
+      audio.play().catch(() => { if (token === playToken) { playing = false; audio.muted = false; loading(false); updatePlayer(); } });
       warm(i);
     }
+  }
+
+  // a ring turns around the play button while the recording loads (the first start of a talk takes seconds)
+  function loading(on) {
+    $('pl-toggle').classList.toggle('loading', on);
+    if (on) $('pl-toggle').setAttribute('aria-busy', 'true'); else $('pl-toggle').removeAttribute('aria-busy');
   }
 
   // loads the next piece from another recording into the spare player, at its start
@@ -688,6 +695,7 @@
     audio.pause();
     cur = el;
     mark(el);
+    if (window.MSPM && window.MSPM.onSelect) window.MSPM.onSelect(el);
     $('player').hidden = false;
     document.body.classList.add('has-player');
     if (scroll) el.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
@@ -719,6 +727,10 @@
     raf = requestAnimationFrame(step);
   }
   players.forEach(a => a.addEventListener('timeupdate', () => { if (a === audio) tick(); }));
+  players.forEach(a => {
+    a.addEventListener('waiting', () => { if (a === audio && playing) loading(true); });
+    for (const ev of ['playing', 'pause', 'error']) a.addEventListener(ev, () => { if (a === audio) loading(false); });
+  });
   setInterval(() => { if (document.hidden && !cue) tick(); }, 500);
 
   function pause() {
@@ -825,6 +837,7 @@
       try { localStorage.setItem('mspm-links', JSON.stringify({ salt: LOCK.salt, links: LINKS })); } catch (err) {}
       $('login-pass').value = '';
       $('login-dialog').close();
+      if (window.MSPM && window.MSPM.onLogin) window.MSPM.onLogin();
       if (pending) start(pending.el, pending.scroll);
       pending = null;
     } catch (err) {
@@ -925,4 +938,25 @@
   showPage(m ? +m[1] : SHOWN[0], false);
   renderLang();
   renderText();
+
+  // ---------- review mode (?review): js/review.js checks and corrects the fragments; these are its hooks ----------
+  window.MSPM = {
+    state: () => ({ el: cur, lang, playing, cue, part, time: audio.currentTime, src: audio.dataset.src }),
+    links: () => LINKS,
+    lines: () => [titleLn, ...seq],
+    text: unitText,
+    replay: () => { if (cur) start(cur, false); },
+    pause: () => pause(),
+    login: () => askLogin(null, false),
+    onSelect: null,
+    onLogin: null
+  };
+  if (new URLSearchParams(location.search).has('review')) {
+    for (const src of ['js/audio-auto.js', 'js/review.js']) {
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = false;
+      document.body.append(s);
+    }
+  }
 })();
