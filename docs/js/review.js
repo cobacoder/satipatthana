@@ -226,33 +226,85 @@
     bar.append(sync);
   }
 
-  // ---------- listening around a boundary ----------
+  // ---------- listening to one piece, or around and beyond its edges ----------
+  // A separate player, so the line's own player keeps its place. Its line in the card shows where it is.
   const ear = new Audio();
   ear.preload = 'none';
-  let earFrom = 0, earStop = 0, earPiece = null, earAt = 0;
-  ear.addEventListener('timeupdate', () => { if (ear.currentTime >= earStop) ear.pause(); });
-  ear.addEventListener('playing', () => message(`Слушаю ${fmt(earFrom)} → ${fmt(earStop)}`));
-  function listen(p, i, from, to) {
+  let earFrom = 0, earStop = Infinity, earPiece = null, earAt = 0;
+  let earEl = null, earText = null, earBtn = null, earScrub = null, earMarks = null, earThumb = null, scrubbing = false;
+  ear.addEventListener('timeupdate', () => { if (ear.currentTime >= earStop) ear.pause(); earShow(); });
+  for (const ev of ['playing', 'pause', 'waiting', 'loadedmetadata']) ear.addEventListener(ev, earShow);
+  const piecesNow = () => { const d = drafts[key(open.lang, open.id)]; return d ? d.pieces : savedCue(open.lang, open.id); };
+  function earShow() {
+    if (!earEl) return;
+    earEl.hidden = !earPiece;
+    if (!earPiece || scrubbing) return;
+    earAt = Date.now();
+    const ready = ear.readyState >= 1 && ear.currentTime >= earFrom - 0.5;
+    const at = ready ? fmt(ear.currentTime) + (isFinite(ear.duration) ? ' из ' + dur(ear.duration) : '') : 'запись загружается…';
+    const where = earWhere(ready ? ear.currentTime : earFrom);
+    earText.textContent = ear.paused && ready
+      ? `${where}: пауза на ${at}. «Начало здесь» и «конец здесь» возьмут это место.`
+      : `${where}: слушаю ${at}` + (isFinite(earStop) ? ` (до ${fmt(earStop)})` : '');
+    earBtn.textContent = ear.paused ? '▶ продолжить' : '❚❚ пауза';
+    drawScrub(ready ? ear.currentTime : earFrom);
+  }
+  // «День 2, кусок 1» while inside a piece of the line, «День 2» elsewhere in the recording
+  const pieceAt = t => piecesNow().findIndex(p => p[0] === earPiece.day && t >= toSec(p[1]) - 0.5 && t <= toSec(p[2]) + 0.5);
+  function earWhere(t) {
+    const j = pieceAt(t), d = dayName(earPiece.day);
+    return d[0].toUpperCase() + d.slice(1) + (j >= 0 ? ', кусок ' + (j + 1) : '');
+  }
+  // the whole recording of the day: the line's pieces in it, and where the listening is
+  function drawScrub(t) {
+    const total = ear.duration;
+    earScrub.hidden = !(total > 0 && isFinite(total));
+    if (earScrub.hidden) return;
+    const pct = x => Math.min(100, Math.max(0, x / total * 100)) + '%';
+    earThumb.style.left = pct(t);
+    earMarks.replaceChildren();
+    const inside = pieceAt(t);
+    piecesNow().forEach((p, j) => {
+      if (p[0] !== earPiece.day) return;
+      const m = mk('span', 'rv-mark' + (j === inside ? ' cur' : ''));
+      m.style.left = pct(toSec(p[1]));
+      m.style.width = (toSec(p[2]) - toSec(p[1])) / total * 100 + '%';
+      m.title = 'Кусок ' + (j + 1);
+      earMarks.append(m);
+    });
+    earScrub.setAttribute('aria-valuemax', Math.round(total));
+    earScrub.setAttribute('aria-valuenow', Math.round(t));
+    earScrub.setAttribute('aria-valuetext', fmt(t) + ' из ' + dur(total));
+  }
+  // moving by hand: listening goes on from there with no stop
+  function seekEar(t) {
+    if (!(ear.duration > 0)) return;
+    t = Math.max(0, Math.min(ear.duration - 0.5, t));
+    earStop = Infinity;
+    earFrom = t;
+    ear.currentTime = t;
+    earShow();
+  }
+  function listen(p, i, from, to = Infinity) {
     const src = M.links()[open.lang][p[0]];
     if (!src) return;
     M.pause();
     earPiece = { i, day: p[0] };
-    earAt = Date.now();
     earFrom = Math.max(0, from);
     earStop = to;
-    if (ear.dataset.src !== src) { ear.src = src; ear.dataset.src = src; }
-    const go = () => { ear.currentTime = Math.max(0, from); };
+    if (ear.dataset.src !== src || ear.error) { ear.src = src; ear.dataset.src = src; }
+    const go = () => { ear.currentTime = earFrom; };
     if (ear.readyState >= 1) go(); else ear.addEventListener('loadedmetadata', go, { once: true });
     ear.play().catch(() => {});
-    message(`Слушаю ${fmt(from)} → ${fmt(to)}` + (ear.readyState < 1 ? ' (запись загружается)' : ''));
+    earShow();
   }
-  // the moment the reviewer is hearing in the recording of piece p, a little before the tap (reaction time);
-  // 'wait' while that recording is still loading
+  // the moment the reviewer is hearing in the recording of piece p (whichever piece the listening started from):
+  // where the pause is, or a little before the tap while it plays (reaction time); 'wait' while it is still loading
   function hereTime(p, i) {
     const src = M.links()[open.lang][p[0]], st = M.state();
-    if (ear.dataset.src === src && earPiece && earPiece.i === i && earPiece.day === p[0] && Date.now() - earAt < 60000) {
+    if (ear.dataset.src === src && earPiece && earPiece.day === p[0] && Date.now() - earAt < 600000) {
       if (ear.readyState < 1 || ear.currentTime < earFrom - 0.5) return 'wait';
-      return ear.currentTime - 0.3;
+      return ear.paused ? ear.currentTime : ear.currentTime - 0.3;
     }
     if (st.el === open.el && st.cue && st.part === i && st.src === src) return st.time > 0 ? st.time - 0.3 : 'wait';
     return null;
@@ -311,6 +363,9 @@
     const t = toSec(p[which]);
     row.append(btn('▶ стык', 'rv-b', () => listen(p, i, isStart ? t - 4 : t - 3, isStart ? t + 3 : t + 4),
       'Послушать вокруг ' + (isStart ? 'начала' : 'конца')));
+    row.append(isStart
+      ? btn('▶ до начала', 'rv-b', () => listen(p, i, t - 30, t + 3), 'Послушать 30 секунд до начала')
+      : btn('▶ после конца', 'rv-b', () => listen(p, i, t - 3), 'Слушать дальше конца, без остановки'));
     row.append(btn(isStart ? 'начало здесь' : 'конец здесь', 'rv-b', () => {
       const h = hereTime(p, i);
       if (h == null) { message('Сначала включите этот кусок («▶ стык» или весь фрагмент), потом нажмите в нужный момент.', true); return; }
@@ -355,6 +410,51 @@
     });
     cardEl.append(st);
 
+    earEl = mk('div', 'rv-ear');
+    earText = mk('span', 'rv-ear-text');
+    earBtn = btn('', 'rv-b', () => {
+      if (!ear.paused) { ear.pause(); return; }
+      if (ear.currentTime >= earStop - 0.1) earStop = Infinity;     // stopped at the end of what was asked: go on past it
+      ear.play().catch(() => {});
+    });
+    earScrub = mk('div', 'rv-scrub');
+    earScrub.setAttribute('role', 'slider');
+    earScrub.setAttribute('aria-label', 'Место во всей записи дня');
+    earScrub.setAttribute('aria-valuemin', '0');
+    earScrub.tabIndex = 0;
+    const track = mk('span', 'rv-track');
+    earMarks = mk('span');
+    earThumb = mk('span', 'rv-thumb');
+    track.append(earMarks, earThumb);
+    earScrub.append(track);
+    const atPointer = ev => {
+      const r = track.getBoundingClientRect();
+      return Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)) * ear.duration;
+    };
+    const preview = ev => { const t = atPointer(ev); drawScrub(t); earText.textContent = `${earWhere(t)}: → ${fmt(t)}`; };
+    earScrub.addEventListener('pointerdown', ev => {
+      if (!(ear.duration > 0)) return;
+      scrubbing = true;
+      earScrub.setPointerCapture(ev.pointerId);
+      preview(ev);
+    });
+    earScrub.addEventListener('pointermove', ev => { if (scrubbing) preview(ev); });
+    earScrub.addEventListener('pointerup', ev => { if (!scrubbing) return; scrubbing = false; seekEar(atPointer(ev)); });
+    earScrub.addEventListener('pointercancel', () => { scrubbing = false; earShow(); });
+    earScrub.addEventListener('keydown', ev => {
+      const step = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5, PageDown: -60, PageUp: 60 }[ev.key];
+      if (step == null) return;
+      ev.preventDefault();
+      seekEar(ear.currentTime + step);
+    });
+    earEl.append(earText, earBtn,
+      btn('−10 с', 'rv-b rv-n', () => seekEar(ear.currentTime - 10), 'На 10 секунд назад'),
+      btn('+10 с', 'rv-b rv-n', () => seekEar(ear.currentTime + 10), 'На 10 секунд вперёд'),
+      btn('закрыть', 'rv-link', () => { ear.pause(); earPiece = null; earShow(); }),
+      earScrub);
+    cardEl.append(earEl);
+    earShow();
+
     const list = mk('div', 'rv-pieces');
     ps.forEach((p, i) => {
       const box = mk('div', 'rv-piece');
@@ -370,6 +470,7 @@
       });
       sel.addEventListener('change', () => { draftOf().pieces[i][0] = sel.value; changed(); });
       ph.append(sel, mk('span', 'rv-len', dur(toSec(p[2]) - toSec(p[1]))));
+      ph.append(btn('▶ кусок целиком', 'rv-b', () => listen(p, i, toSec(p[1]), toSec(p[2])), 'Послушать кусок ' + (i + 1) + ' от начала до конца'));
       ph.append(btn('убрать', 'rv-link', () => { draftOf().pieces.splice(i, 1); changed(); }, 'Убрать кусок ' + (i + 1)));
       box.append(ph, edgeRow(p, i, 1), edgeRow(p, i, 2));
       list.append(box);
@@ -445,6 +546,7 @@
   // ---------- wiring ----------
   M.onSelect = el => {
     ear.pause();
+    earPiece = null;
     open = { lang: lang(), id: el.dataset.id, el };
     renderCard();
   };
@@ -504,6 +606,19 @@ body.rv-open .ln { scroll-margin-bottom: calc(var(--pl-h) + var(--rv-h, 0px) + 2
 .rv-n { min-width: 2.6rem; text-align: center; font-variant-numeric: tabular-nums; }
 .rv-link { all: unset; cursor: pointer; color: var(--ochre); text-decoration: underline; text-underline-offset: 2px; font: .8125rem var(--f-ui); }
 .rv-x { all: unset; cursor: pointer; font-size: 1.4rem; line-height: 1; padding: 0 .3rem; color: var(--muted); }
+.rv-ear { position: sticky; top: -.75rem; z-index: 1; display: flex; flex-wrap: wrap; gap: .4rem .8rem; align-items: center;
+  padding: .4rem .6rem; border-radius: 6px; background: var(--hover); font-variant-numeric: tabular-nums; }
+.rv-ear[hidden] { display: none; }
+.rv-ear-text { flex: 1 1 16rem; }
+.rv-scrub { flex-basis: 100%; padding: 8px 7px; cursor: pointer; touch-action: none; border-radius: 4px; }
+.rv-scrub[hidden] { display: none; }
+.rv-scrub:focus-visible { outline: none; }
+.rv-scrub .rv-track { position: relative; display: block; height: 6px; border-radius: 3px; background: var(--hair); }
+.rv-mark { position: absolute; top: 0; bottom: 0; min-width: 3px; border-radius: 3px; background: color-mix(in srgb, var(--ochre) 40%, transparent); }
+.rv-mark.cur { background: var(--ochre); }
+.rv-thumb { position: absolute; top: 50%; left: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%;
+  background: var(--ink); box-shadow: 0 0 0 2px var(--hover); }
+.rv-scrub:focus-visible .rv-thumb { box-shadow: 0 0 0 5px color-mix(in srgb, var(--ochre) 40%, transparent); }
 .rv-pieces { display: grid; gap: .5rem; justify-items: start; }
 .rv-piece { display: grid; gap: .35rem; width: 100%; padding: .5rem .6rem; border: 1px solid var(--hair); border-radius: 6px; box-sizing: border-box; }
 .rv-ph { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
