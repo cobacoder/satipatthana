@@ -101,7 +101,10 @@
       short05: 'Отдельного объяснения нет: сейчас 5 секунд перехода к беседе.',
       day1_20: 'В первом дне есть короткое упоминание ātāpī sampajāno satimā (EN 39:35–40:08, RU 23:27) — можно добавить первым куском.',
       twoDays: 'Два дня подряд: краткий разбор из второго дня и подробный из третьего. Оставить оба или только подробный?',
-      pair: (a, b) => `Вдох и выдох объясняются вместе: у строк ${a} и ${b} общий фрагмент.`,
+      split31: 'Пара поделена по объяснению: вдох — 1.31, выдох — 1.32.',
+      split37: 'Пара поделена: у каждой строки своё чтение на пали; объяснение до слов о выдохе — в 1.37, дальше — в 1.38.',
+      split39: 'У каждой строки своё чтение на пали; объяснение у них общее и звучит один раз, в 1.39.',
+      noTitle: 'Название раздела в беседе только упоминается или не звучит, отдельного объяснения нет: без звука.',
       shared: ids => `Общий фрагмент у строк ${ids}.`,
       readAll: 'Отдельного объяснения нет: чтение всех трёх фраз рефрена.',
       comment03: 'Сюда вошёл и разбор комментариев: что значит «внутри» и «снаружи» (3,5 мин), — он объясняет и 2.02. Оставить здесь или перенести к 2.02?',
@@ -169,7 +172,10 @@
       short05: 'There is no separate explanation: for now, 5 seconds leading into the discourse.',
       day1_20: 'Day 1 has a short mention of ātāpī sampajāno satimā (EN 39:35–40:08, RU 23:27) — it could be added as the first piece.',
       twoDays: 'Two days in a row: the short explanation from day 2 and the detailed one from day 3. Keep both or only the detailed one?',
-      pair: (a, b) => `Breathing in and out are explained together: lines ${a} and ${b} share one fragment.`,
+      split31: 'The pair is split along the explanation: breathing in is 1.31, breathing out is 1.32.',
+      split37: 'The pair is split: each line has its own Pali reading; the explanation up to the words on breathing out is in 1.37, the rest in 1.38.',
+      split39: 'Each line has its own Pali reading; their explanation is shared and plays once, in 1.39.',
+      noTitle: 'The talk only names this section or does not mention it, with no explanation of the title: no audio.',
       shared: ids => `Lines ${ids} share one fragment.`,
       readAll: 'There is no separate explanation: the reading of all three phrases of the refrain.',
       comment03: 'This also takes in the talk on the commentaries, what “internally” and “externally” mean (3.5 minutes), which explains 2.02 too. Keep it here or move it to 2.02?',
@@ -193,7 +199,10 @@
     const n = { '1.01': t.long01, '1.02': t.long02, '1.05': t.short05 };
     for (let k = 12; k <= 22; k++) n['1.' + k] = t.twoDays;
     n['1.20'] += ' ' + t.day1_20;
-    for (const [a, b] of [['1.31', '1.32'], ['1.37', '1.38'], ['1.39', '1.40']]) n[a] = n[b] = t.pair(a, b);
+    n['1.31'] = n['1.32'] = t.split31;
+    n['1.37'] = n['1.38'] = t.split37;
+    n['1.39'] = n['1.40'] = t.split39;
+    for (const id of ['s2', 's5', 's7']) n[id] = t.noTitle;
     Object.assign(n, { '2.03': t.comment03, '2.04': t.readAll, '2.14': t.leader, '2.32': t.leader, '3.22': t.noBrain, '3.68': t.closing });
     n['2.20'] = n['2.21'] = t.shared('2.20, 2.21');
     for (let k = 3; k <= 34; k++) if (k !== 22) n['3.' + String(k).padStart(2, '0')] = t.chip;
