@@ -214,8 +214,18 @@
   const R = {
     sec(b) {
       const h = mk('h2', 'sec-h');
-      if (b.n) h.append(numEl(String(b.n), '(%)'));
-      h.append(b.pi ? tEl(b.pi, 'pi', { cap: 1 }) : tEl(b.hi.d, 'hi', { ia: b.hi.ia }));
+      if (b.n && b.pi) {
+        // a numbered section title is a line too (id s3 for section 3): it has its own explanation in the talks
+        const x = mk('span', 'ln', [numEl(String(b.n), '(%)'), tEl(b.pi, 'pi', { cap: 1 })]);
+        x.setAttribute('role', 'button');
+        x.tabIndex = 0;
+        x.dataset.id = 's' + b.n;
+        remember(x.dataset.id, { en: b.en, ru: b.ru });
+        h.append(x);
+      } else {
+        if (b.n) h.append(numEl(String(b.n), '(%)'));
+        h.append(b.pi ? tEl(b.pi, 'pi', { cap: 1 }) : tEl(b.hi.d, 'hi', { ia: b.hi.ia }));
+      }
       if (b.gl) h.append(mk('span', 'gl', tEl(b.gl.d, 'hi', { ia: b.gl.ia })));
       return [h, trEl(b, 'p')];
     },
@@ -474,7 +484,7 @@
       orig: 'Original page (scan)',
       note: 'Pali checked against the Chaṭṭha Saṅgāyana edition of the Dīgha Nikāya 22, the 22nd sutta of the Long Discourses; misprints in the brochure are corrected.',
       prev: 'Previous line', next: 'Next line', play: 'Play', pause: 'Pause', close: 'Close player', seek: 'Position in the explanation',
-      line0: 'Line 0 · the title', loadErr: 'The recording did not load. Tap play again.',
+      line0: 'Line 0 · the title', secLine: 'Section ({n}) · the title', loadErr: 'The recording did not load. Tap play again.',
       prevPage: 'Previous page', nextPage: 'Next page',
       loginTitle: 'Recordings for old students',
       loginText: 'The explanations are talks from the Satipaṭṭhāna course. Enter the login and password for old students, the same as on discourses.dhamma.org.',
@@ -492,7 +502,7 @@
       orig: 'Оригинал страницы (скан)',
       note: 'Текст на пали сверен с изданием Чаттха Сангаяна: Дигха-никая 22, двадцать вторая сутта Собрания длинных наставлений. Опечатки брошюры исправлены.',
       prev: 'Предыдущая строка', next: 'Следующая строка', play: 'Слушать', pause: 'Пауза', close: 'Закрыть плеер', seek: 'Место в объяснении',
-      line0: 'Строка 0 · название', loadErr: 'Запись не загрузилась. Нажмите «Слушать» ещё раз.',
+      line0: 'Строка 0 · название', secLine: 'Раздел ({n}) · название', loadErr: 'Запись не загрузилась. Нажмите «Слушать» ещё раз.',
       prevPage: 'Предыдущая страница', nextPage: 'Следующая страница',
       loginTitle: 'Записи для старых студентов',
       loginText: 'Пояснения — это беседы с курса Сатипаттханы. Введите логин и пароль для старых студентов, такие же, как на discourses.dhamma.org.',
@@ -570,8 +580,8 @@
   const ICON_PLAY = 'M4 2v12l10-6z', ICON_PAUSE = 'M3 2h3.5v12H3zM9.5 2H13v12H9.5z';
 
   let cur = null, playing = false, pageMode = false, t0 = 0, done = 0, dur = 0, raf = 0, playToken = 0;
-  // cue of the current line: its pieces of the recordings, played one after another; heard = pieces played in page mode
-  let cue = null, cueLang = null, part = 0, heard = [], dragging = false;
+  // cue of the current line: its pieces of the recordings, played one after another
+  let cue = null, cueLang = null, part = 0, dragging = false;
   // line 0: the title, explained at the start of the reading; it stands before 1.01 of page 1
   const titleLn = $('title-ln');
   UNITS.set('0', { en: 'The Great Discourse on the Establishing of Awareness', ru: 'Большая беседа об установлении осознанности' });
@@ -605,14 +615,9 @@
     parts.forEach(p => { p.at = at; at += p.end - p.start; });
     return { parts, dur: at };
   }
-  // page mode skips a line whose pieces were all heard already (the same passage explains several lines)
-  // and, once this language has any audio, a line that has none yet
-  const isHeard = c => c.parts.every(p => heard.some(h => h.src === p.src && h.start <= p.start + 1 && h.end >= p.end - 1));
-  function skipped(el) {
-    if (!rawCue(el)) return Object.keys(CUES[lang] || {}).length > 0;
-    const c = cueFor(el);
-    return !!c && isHeard(c);
-  }
+  // page mode plays the lines strictly in their order, even when a passage repeats one played before;
+  // it skips only a line that has no audio yet, once this language has any audio
+  const skipped = el => !rawCue(el) && Object.keys(CUES[lang] || {}).length > 0;
   function unitText(el) {
     if (el.dataset.full) return translit(el.dataset.full, 'pi', null, true);
     return [...el.querySelectorAll('.n, .t')].map(x =>
@@ -707,7 +712,6 @@
     cue = cueFor(el);
     cueLang = lang;
     if (cue) {
-      if (pageMode) heard.push(...cue.parts);
       playPart(0);
       dur = cue.dur;
     } else dur = demoDur(el);
@@ -779,13 +783,12 @@
     let nx = pageMode && neighbor(1);
     while (nx && skipped(nx)) nx = neighborOf(nx, 1);
     if (nx) start(nx, true);
-    else { pageMode = false; heard = []; updatePlayer(); }
+    else { pageMode = false; updatePlayer(); }
   }
 
   function closePlayer() {
     pause();
     pageMode = false;
-    heard = [];
     mark(null);
     cur = null;
     $('player').hidden = true;
@@ -820,7 +823,9 @@
     if (trP) trP.lang = tr[lang] ? lang : 'en';
     $('pl-tr').replaceChildren(...(trP ? [trP] : []));
     const si = seq.indexOf(cur);
-    $('pl-count').textContent = cur === titleLn ? L.line0 : si >= 0 ? L.lineOf.replace('{n}', si + 1).replace('{N}', seq.length) : L.cell;
+    const secN = /^s(\d+)$/.exec(cur.dataset.id);
+    $('pl-count').textContent = cur === titleLn ? L.line0 : secN ? L.secLine.replace('{n}', secN[1])
+      : si >= 0 ? L.lineOf.replace('{n}', si + 1).replace('{N}', seq.length) : L.cell;
     $('pl-note').textContent = cueFor(cur) ? '' : L.demo;
     $('pl-prev').disabled = !neighbor(-1);
     $('pl-next').disabled = !neighbor(1);
@@ -913,7 +918,7 @@
   $('play-all').addEventListener('click', () => {
     if (pageMode && playing) pause();
     else if (pageMode && cur) resume();
-    else { pageMode = true; heard = []; start([...(page === 1 ? [titleLn] : []), ...seq].find(l => !skipped(l)) || seq[0], true); }
+    else { pageMode = true; start([...(page === 1 ? [titleLn] : []), ...seq].find(l => !skipped(l)) || seq[0], true); }
   });
   players.forEach(a => a.addEventListener('ended', () => {
     if (a !== audio || !playing) return;

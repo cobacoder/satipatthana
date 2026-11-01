@@ -77,7 +77,9 @@
       startHere: 'начало здесь', endHere: 'конец здесь',
       hereNone: 'Сначала включите этот кусок («▶ стык» или весь фрагмент), потом нажмите в нужный момент.',
       hereWait: 'Запись ещё загружается. Нажмите, когда услышите нужное место.',
-      line: id => id === '0' ? 'Строка 0 (название)' : 'Строка ' + id,
+      line: id => id === '0' ? 'Строка 0 (название)' : id[0] === 's' ? `Название раздела (${id.slice(1)})` : 'Строка ' + id,
+      fragEnd: ['■ конец фрагмента здесь', 'Закончить весь фрагмент там, где сейчас пауза или звучание'],
+      fragNone: 'Сначала включите «▶ весь фрагмент» (или кусок этой строки), поставьте паузу в нужном месте и нажмите снова.',
       rec: { en: 'английская запись', ru: 'русская запись' },
       closeCard: 'Закрыть проверку', loginCard: 'Чтобы слушать и править, войдите как старый студент.',
       statusL: 'Состояние строки', recOf: i => 'Запись куска ' + i,
@@ -99,7 +101,18 @@
       short05: 'Отдельного объяснения нет: сейчас 5 секунд перехода к беседе.',
       day1_20: 'В первом дне есть короткое упоминание ātāpī sampajāno satimā (EN 39:35–40:08, RU 23:27) — можно добавить первым куском.',
       twoDays: 'Два дня подряд: краткий разбор из второго дня и подробный из третьего. Оставить оба или только подробный?',
-      pair: (a, b) => `Вдох и выдох объясняются вместе: у строк ${a} и ${b} общий фрагмент.`
+      pair: (a, b) => `Вдох и выдох объясняются вместе: у строк ${a} и ${b} общий фрагмент.`,
+      shared: ids => `Общий фрагмент у строк ${ids}.`,
+      readAll: 'Отдельного объяснения нет: чтение всех трёх фраз рефрена.',
+      comment03: 'Сюда вошёл и разбор комментариев: что значит «внутри» и «снаружи» (3,5 мин), — он объясняет и 2.02. Оставить здесь или перенести к 2.02?',
+      leader: 'Краткая форма рефрена. Фрагмент — о фразах, которые повторяются в каждом разделе (пример с пагодой).',
+      chip: 'Слово из перечня на пали и его перевод.',
+      noBrain: 'В перечне DN 22 мозга нет, Гоенкаджи его не называет: аудио нет.',
+      skeleton: 'Чтение этой строки на пали и общее объяснение строк 3.49–3.52.',
+      reflect: 'Два куска: размышление после первого тела и после костей.',
+      refrain3: 'Рефрен здесь только читается, без объяснения; подробное объяснение — на странице 2 (2.01–2.13).',
+      ref58: 'Чтение после первого тела: все три фразы — внутри, снаружи, внутри и снаружи.',
+      closing: 'Эта фраза здесь не читается; фрагмент — итог всех разделов о теле.'
     },
     en: {
       status: { '': 'Not checked', ok: 'Correct', fix: 'Needs a fix', none: 'No explanation' },
@@ -133,7 +146,9 @@
       startHere: 'start here', endHere: 'end here',
       hereNone: 'First play this piece (“▶ around” or the whole fragment), then press at the right moment.',
       hereWait: 'The recording is still loading. Press when you hear the right spot.',
-      line: id => id === '0' ? 'Line 0 (the title)' : 'Line ' + id,
+      line: id => id === '0' ? 'Line 0 (the title)' : id[0] === 's' ? `Section (${id.slice(1)}) title` : 'Line ' + id,
+      fragEnd: ['■ end the fragment here', 'End the whole fragment where the pause or the listening is now'],
+      fragNone: 'First play “▶ whole fragment” (or a piece of this line), pause at the right spot and press again.',
       rec: { en: 'English recording', ru: 'Russian recording' },
       closeCard: 'Close the review', loginCard: 'To listen and edit, log in as an old student.',
       statusL: 'Line status', recOf: i => 'Recording of piece ' + i,
@@ -154,7 +169,18 @@
       short05: 'There is no separate explanation: for now, 5 seconds leading into the discourse.',
       day1_20: 'Day 1 has a short mention of ātāpī sampajāno satimā (EN 39:35–40:08, RU 23:27) — it could be added as the first piece.',
       twoDays: 'Two days in a row: the short explanation from day 2 and the detailed one from day 3. Keep both or only the detailed one?',
-      pair: (a, b) => `Breathing in and out are explained together: lines ${a} and ${b} share one fragment.`
+      pair: (a, b) => `Breathing in and out are explained together: lines ${a} and ${b} share one fragment.`,
+      shared: ids => `Lines ${ids} share one fragment.`,
+      readAll: 'There is no separate explanation: the reading of all three phrases of the refrain.',
+      comment03: 'This also takes in the talk on the commentaries, what “internally” and “externally” mean (3.5 minutes), which explains 2.02 too. Keep it here or move it to 2.02?',
+      leader: 'The short form of the refrain. The fragment is about the phrases repeated in every section (the simile of the pagoda).',
+      chip: 'The word from the list in Pali, then its translation.',
+      noBrain: 'The list in DN 22 has no brain, and Goenkaji does not name it: no audio.',
+      skeleton: 'This line read in Pali, then the explanation shared by lines 3.49–3.52.',
+      reflect: 'Two pieces: the reflection after the first body and after the bones.',
+      refrain3: 'Here the refrain is only read, without an explanation; the detailed one is on page 2 (2.01–2.13).',
+      ref58: 'The reading after the first body: all three phrases, internally, externally, both.',
+      closing: 'This phrase is not read here; the fragment sums up all the sections on the body.'
     }
   };
   const T = () => UI[lang()] || UI.en;
@@ -162,22 +188,42 @@
   const dayName = d => T().days[d] || T().day(d.slice(3));
   const when = iso => new Date(iso).toLocaleString(T().locale, { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  // notes from the automatic marking for both recordings; `first` marks a line to check first (Russian recording only)
+  // notes from the automatic marking for both recordings; `first` marks a line to check first
   function bothNotes(t) {
     const n = { '1.01': t.long01, '1.02': t.long02, '1.05': t.short05 };
     for (let k = 12; k <= 22; k++) n['1.' + k] = t.twoDays;
     n['1.20'] += ' ' + t.day1_20;
     for (const [a, b] of [['1.31', '1.32'], ['1.37', '1.38'], ['1.39', '1.40']]) n[a] = n[b] = t.pair(a, b);
+    Object.assign(n, { '2.03': t.comment03, '2.04': t.readAll, '2.14': t.leader, '2.32': t.leader, '3.22': t.noBrain, '3.68': t.closing });
+    n['2.20'] = n['2.21'] = t.shared('2.20, 2.21');
+    for (let k = 3; k <= 34; k++) if (k !== 22) n['3.' + String(k).padStart(2, '0')] = t.chip;
+    for (let k = 49; k <= 51; k++) n['3.' + k] = t.skeleton;
+    n['3.56'] = n['3.57'] = t.reflect + ' ' + t.shared('3.56, 3.57');
+    n['3.58'] = t.ref58 + ' ' + t.refrain3;
+    for (let k = 59; k <= 67; k++) n['3.' + k] = t.refrain3;
     return n;
   }
   const BOTH = { ru: bothNotes(UI.ru), en: bothNotes(UI.en) };
+  const each = (ids, note) => Object.fromEntries(ids.map(id => [id, note]));
+  const range = (p, a, b) => Array.from({ length: b - a + 1 }, (_, i) => p + '.' + String(a + i).padStart(2, '0'));
   const NOTES = {
-    en: {},
+    en: {
+      ...each(range(2, 17, 19), { first: 1, text: 'Check first: the Pali of these lines is not in the transcript; the boundaries follow the pauses.' }),
+      ...each([...range(3, 49, 51), '3.54', '3.55'], { first: 1, text: 'Check first: the Pali of these lines is not in the transcript; the boundaries follow the pauses.' }),
+      ...each(['3.56', '3.57'], { first: 1, text: 'The Pali at the start of the second piece is not in the transcript; it is placed by the pauses.' })
+    },
     ru: {
       '0': { first: 1, text: 'Распознавание потеряло начало (0:03–0:30); начало фрагмента поставлено по записи.' },
       '1.06': { first: 1, text: 'Проверить первым: распознавание потеряло около минуты русской речи, начало второго куска (46:20.6) поставлено по паузе.' },
       '1.23': { first: 1, text: 'Распознавание потеряло русскую речь на 17:55–18:06, конец поставлен по паузе.' },
-      '1.24': { first: 1, text: 'Распознавание потеряло русскую речь на 17:55–18:06, фрагмент поставлен по паузам.' }
+      '1.24': { first: 1, text: 'Распознавание потеряло русскую речь на 17:55–18:06, фрагмент поставлен по паузам.' },
+      ...each(['2.11', '2.12'], { first: 1, text: '«Na ca kiñci loke upādiyati» не расшифровано: граница 2.11/2.12 поставлена по паузе.' }),
+      '2.24': { first: 1, text: 'Проверить первым: распознавание потеряло около 25 с русской речи перед этой строкой, начало (67:28.6) поставлено по паузе; метки слов в перечне сдвинуты на 1–2 с.' },
+      ...each(range(2, 25, 30), { first: 1, text: 'Проверить первым: метки слов в русском перечне сдвинуты на 1–2 с, границы поставлены по словам перевода.' }),
+      '3.30': { text: 'В русском переводе перечня vasā (жировая влага) пропущена: только слово на пали.' },
+      ...each(['3.41', '3.42'], { first: 1, text: 'Распознавание потеряло перевод «paṭhavīdhātu…» (31:05–31:17): граница 3.41/3.42 поставлена по паузе.' }),
+      ...each([...range(3, 49, 55), '3.58', ...range(3, 59, 67)], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, границы поставлены по английской записи (то же чтение Гоенкаджи) и по паузам.' }),
+      ...each(['3.56', '3.57'], { first: 1, text: 'Начало второго куска (чтение на пали) поставлено по английской записи и по паузам.' })
     }
   };
   const notesFor = (l, id) => [NOTES[l][id], BOTH[l][id] && { text: BOTH[l][id] }].filter(Boolean);
@@ -414,7 +460,21 @@
       if (ear.readyState < 1 || ear.currentTime < earFrom - 0.5) return 'wait';
       return ear.paused ? ear.currentTime : ear.currentTime - 0.3;
     }
-    if (st.el === open.el && st.cue && st.part === i && st.src === src) return st.time > 0 ? st.time - 0.3 : 'wait';
+    if (st.el === open.el && st.cue && st.src === src) return st.time > 0 ? (st.playing ? st.time - 0.3 : st.time) : 'wait';
+    return null;
+  }
+  // where the listening is in the line as a whole: [piece, time] from the card's player or the line's player
+  function listeningAt() {
+    const ps = piecesNow(), st = M.state(), links = M.links()[open.lang];
+    if (earPiece && Date.now() - earAt < 600000) {
+      if (ear.readyState < 1 || ear.currentTime < earFrom - 0.5) return 'wait';
+      const t = ear.paused ? ear.currentTime : ear.currentTime - 0.3, j = pieceAt(t);
+      return j >= 0 ? [j, t] : null;
+    }
+    if (st.el === open.el && st.cue && links[(ps[st.part] || [])[0]] === st.src) {
+      if (!(st.time > 0)) return 'wait';
+      return [st.part, st.playing ? st.time - 0.3 : st.time];
+    }
     return null;
   }
 
@@ -476,6 +536,7 @@
       const h = hereTime(p, i);
       if (h == null) { message(T().hereNone, true); return; }
       if (h === 'wait') { message(T().hereWait, true); return; }
+      if (!isStart) { ear.pause(); M.pause(); }
       set(h);
     }));
     return row;
@@ -605,9 +666,20 @@
     const saveBtn = btn(t.save, 'rv-b rv-main', save);
     saveBtn.disabled = !d;
     acts.append(saveBtn, btn(t.fragment, 'rv-b', () => { ear.pause(); M.replay(); }));
+    acts.append(btn(t.fragEnd[0], 'rv-b', () => {
+      const h = listeningAt();
+      if (h == null) { message(T().fragNone, true); return; }
+      if (h === 'wait') { message(T().hereWait, true); return; }
+      const [j, at] = h, p = draftOf().pieces;
+      ear.pause();
+      M.pause();
+      p.splice(j + 1);
+      p[j][2] = fmt(Math.max(at, toSec(p[j][1]) + 0.5));
+      changed();
+    }, t.fragEnd[1]));
     if (d) acts.append(btn(t.discard, 'rv-link', discard));
     const auto = pieces(AUTO[open.lang] && AUTO[open.lang][open.id]);
-    if (!same(ps, auto)) {
+    if (auto.length && !same(ps, auto)) {
       acts.append(btn(t.autoBack, 'rv-link', () => {
         draftOf().pieces = auto.map(p => p.slice());
         changed('auto');
