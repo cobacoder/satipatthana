@@ -224,12 +224,12 @@
         h.append(x);
       } else {
         if (b.n) h.append(numEl(String(b.n), '(%)'));
-        h.append(b.pi ? tEl(b.pi, 'pi', { cap: 1 }) : tEl(b.hi.d, 'hi', { ia: b.hi.ia }));
+        h.append(b.pi ? tEl(b.pi, 'pi', { cap: 1 }) : tEl(b.hi.d, 'hi', { ia: b.hi.ia, cap: 1 }));
       }
       if (b.gl) h.append(mk('span', 'gl', tEl(b.gl.d, 'hi', { ia: b.gl.ia })));
       return [h, trEl(b, 'p')];
     },
-    h(b) { return [mk('h2', 'big-h', tEl(b.d, 'hi', { ia: b.ia })), trEl(b, 'p')]; },
+    h(b) { return [mk('h2', 'big-h', tEl(b.d, 'hi', { ia: b.ia, cap: 1 })), trEl(b, 'p')]; },
     prose(b) {
       const p = mk('p', 'prose' + (b.box ? ' box boxp' : '') + (b.center ? ' center' : ''));
       b.u.forEach((x, i) => { if (i) p.append(' '); p.append(unitEl(x, true)); });
