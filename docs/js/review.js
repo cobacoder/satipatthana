@@ -116,6 +116,23 @@
       refrain3: 'Рефрен здесь только читается, без объяснения; подробное объяснение — на странице 2 (2.01–2.13).',
       ref58: 'Чтение после первого тела: все три фразы — внутри, снаружи, внутри и снаружи.',
       closing: 'Эта фраза здесь не читается; фрагмент — итог всех разделов о теле.',
+      s12Parts: 'Название раздела дано двумя кусками: перечень пяти совокупностей (4:23–5:06) вырезан из середины и звучит в 6.25–6.29.',
+      aggOrder: 'Гоенкаджи называет совокупности в другом порядке: материя, сознание, восприятие, ощущение, формирования.',
+      colNoneK: 'Отдельного объяснения нет: всё сказанное об этой совокупности разложено по ячейкам столбца.',
+      noVinnana: 'Сознание (viññāṇa) в этом месте не читается: Гоенкаджи разбирает четыре совокупности и говорит «итак, все пять». Что это такое, сказано в 6.29.',
+      rowCellK: 'Фрагмент совпадает с первой ячейкой строки: объяснение слова дано только на примере материи.',
+      refrain38: 'Весь рефрен в одной строке (5 мин): сюда входят сравнения с автомобилем и неделей.',
+      s13Parts: 'Название дано тремя кусками: перечни органов чувств и их объектов вырезаны и звучат в 7.04–7.15.',
+      word7: 'Только слово из перечня, меньше секунды: начало или конец могут звучать обрезанно.',
+      sense7: 'После чтения слова идёт весь разбор этой пары: те же четыре фразы, что в 7.29–7.32, но для этого органа чувств. Отдельных строк у них здесь нет.',
+      verb28: 'Отдельного объяснения нет: «pajānāti» звучит вместе со словами в чтениях 7.16 и 7.17.',
+      read29: 'Два куска: чтение следующей строки (19:01–19:05) стоит внутри объяснения и отдано 7.30.',
+      read30: 'Два куска: чтение строки стоит внутри объяснения 7.29, а её разбор начинается позже, со слов о старых узлах.',
+      long31: 'Длинный фрагмент (4 мин): три вида искоренения и сравнение с прудом.',
+      sum33: 'Начинается с минуты итога о шести органах чувств (32:02–33:13), сам рефрен идёт дальше.',
+      s14Parts: 'Название дано двумя кусками: вступление и итог после семи факторов; сами факторы — в 8.04–8.10.',
+      long08: 'Длинный фрагмент (10,5 мин). С 52:47 идёт отступление о нейтральных ощущениях и разных традициях (примерно до 57:18); можно вынести или обрезать.',
+      rowCellB: 'Фрагмент совпадает с первой ячейкой строки: разбор сделан на примере сати.',
       s9Long: 'Длинный фрагмент (7 мин): о чём раздел и почему ощущения так важны. С 2:13 идёт рассказ о джханах, здесь можно обрезать.',
       terms12: 'Объяснение общее для 4.12–4.14, по терминам не делится и звучит один раз, здесь.',
       termNone: 'Отдельного объяснения термина нет: общее объяснение звучит в 4.12.',
@@ -201,6 +218,23 @@
       refrain3: 'Here the refrain is only read, without an explanation; the detailed one is on page 2 (2.01–2.13).',
       ref58: 'The reading after the first body: all three phrases, internally, externally, both.',
       closing: 'This phrase is not read here; the fragment sums up all the sections on the body.',
+      s12Parts: 'The section title comes in two pieces: the list of the five aggregates (7:42–8:50) is cut out of the middle and plays in 6.25–6.29.',
+      aggOrder: 'Goenkaji names the aggregates in a different order: matter, consciousness, perception, sensation, formations.',
+      colNoneK: 'No explanation of its own: all that is said about this aggregate is spread over the cells of the column.',
+      noVinnana: 'Consciousness (viññāṇa) is not read here: Goenkaji goes through four aggregates and says “like these five”. What it is, is said in 6.29.',
+      rowCellK: 'The fragment is the same as the first cell of the row: the word is explained only on matter.',
+      refrain38: 'The whole refrain is one line (5.5 minutes): it includes the comparisons with a car and a week.',
+      s13Parts: 'The title comes in three pieces: the lists of the sense organs and their objects are cut out and play in 7.04–7.15.',
+      word7: 'Only the word from the list, about a second: its start or end may sound clipped.',
+      sense7: 'After the reading comes the whole discussion of this pair: the same four phrases as 7.29–7.32, for this sense organ. They have no lines of their own here.',
+      verb28: 'No explanation of its own: “pajānāti” is heard with the words in the readings of 7.16 and 7.17.',
+      read29: 'Two pieces: the reading of the next line (25:37–25:43) stands inside the explanation and goes to 7.30.',
+      read30: 'Two pieces: the reading of the line stands inside the explanation of 7.29, and its discussion starts later, with the words on the old knots.',
+      long31: 'A long fragment (3.5 minutes): the three kinds of eradication and the comparison with a pond.',
+      sum33: 'It starts with a minute of summing up the six sense organs (37:12–38:09); the refrain itself comes after that.',
+      s14Parts: 'The title comes in two pieces: the introduction and the summing up after the seven factors; the factors themselves are in 8.04–8.10.',
+      long08: 'A long fragment (9.5 minutes). From 57:31 there is a digression on neutral sensations and different traditions (to about 61:32); it could be moved or cut.',
+      rowCellB: 'The fragment is the same as the first cell of the row: the discussion is made on sati.',
       s9Long: 'A long fragment (8 minutes): what the section is about and why sensations matter so much. From 3:39 it is the story of the jhānas; it could be cut there.',
       terms12: 'The explanation is shared by 4.12–4.14, cannot be split by term and plays once, here.',
       termNone: 'This term has no explanation of its own: the shared one plays in 4.12.',
@@ -240,6 +274,13 @@
     for (let k = 59; k <= 67; k++) n['3.' + k] = t.refrain3;
     Object.assign(n, { s9: t.s9Long, '4.12': t.terms12, '4.13': t.termNone, '4.14': t.termNone, '4.17': t.school17, '4.27': t.sum27,
       '5.19': t.citta19, '5.22': t.split22, '5.24': t.split22, '5.26': t.long26, s11: t.s11Long, '6.14': t.joint14, '6.15': t.joint14see, '6.16': t.joint14see });
+    Object.assign(n, { s12: t.s12Parts, s13: t.s13Parts, s14: t.s14Parts, '6.25': t.aggOrder, '6.38': t.refrain38, '7.28': t.verb28, '7.29': t.read29, '7.30': t.read30, '7.31': t.long31, '7.33': t.sum33, '8.08': t.long08 });
+    for (let k = 30; k <= 33; k++) n['6.' + k] = t.colNoneK;
+    n['6.34'] = t.noVinnana;
+    for (let r = 1; r <= 3; r++) { n['6.k.' + r + '.5'] = t.noVinnana; n['6.k.' + r + '.1'] = n['6.' + (34 + r)] = t.rowCellK; }
+    ['7.04', '7.06', '7.08', '7.10', '7.12', '7.14'].forEach(k => { n[k] = t.word7; });
+    ['7.19', '7.21', '7.23', '7.25', '7.27'].forEach(k => { n[k] = t.sense7; });
+    for (let r = 1; r <= 4; r++) n['8.m.' + r + '.1'] = n['8.' + (10 + r)] = t.rowCellB;
     for (let k = 34; k <= 38; k++) n['5.' + k] = t.hindWord;
     for (let k = 1; k <= 5; k++) { n['6.0' + k] = t.colNone; n['6.n.' + k + '.1'] = t.rowCell; n['6.' + String(k + 5).padStart(2, '0')] = t.rowCell; }
     return n;
@@ -253,7 +294,9 @@
       ...each([...range(3, 49, 51), '3.54', '3.55'], { first: 1, text: 'Check first: the Pali of these lines is not in the transcript; the boundaries follow the pauses.' }),
       ...each(['3.56', '3.57'], { first: 1, text: 'The Pali at the start of the second piece is not in the transcript; it is placed by the pauses.' }),
       ...each(['5.02', '5.06', '5.08', '5.23'], { first: 1, text: 'Check first: this Pali reading is not in the transcript; it was identified from the sound, not by ear.' }),
-      ...each(['6.18', '6.19'], { first: 1, text: 'Check first: the boundary between 6.18 and 6.19 sits in a very short pause.' })
+      ...each(['6.18', '6.19'], { first: 1, text: 'Check first: the boundary between 6.18 and 6.19 sits in a very short pause.' }),
+      ...each(['6.23', '6.24', '6.35', '6.k.1.1', '7.02', '7.03', '7.30'], { first: 1, text: 'Check first: this Pali reading is not in the transcript; the boundaries follow the pauses.' }),
+      ...each(['8.m.2.4', '8.m.3.4', '8.m.1.7', '8.m.2.7', '8.m.3.7'], { first: 1, text: 'Check first: these readings run with hardly a pause and are not in the transcript; the boundaries follow the loudness.' })
     },
     ru: {
       '0': { first: 1, text: 'Распознавание потеряло начало (0:03–0:30); начало фрагмента поставлено по записи.' },
@@ -271,7 +314,10 @@
       ...each(['5.02', '5.06', '5.08', '5.23', '6.n.1.4'], { first: 1, text: 'Проверить первым: это чтение на пали не расшифровано, место найдено сравнением с английской записью, не на слух.' }),
       '5.07': { first: 1, text: 'Внутри (31:02–31:04) похоже остался обрывок английской речи Гоенкаджи: так в самом дубляже. На слух не проверено.' },
       '6.16': { text: 'В русской записи здесь только короткое чтение, без «dhammesu viharati».' },
-      ...each(['6.18', '6.19'], { first: 1, text: 'Проверить первым: граница 6.18/6.19 стоит в очень короткой паузе (0,08 с).' })
+      ...each(['6.18', '6.19'], { first: 1, text: 'Проверить первым: граница 6.18/6.19 стоит в очень короткой паузе (0,08 с).' }),
+      ...each(['6.22', '6.23', '6.24', '6.35', '6.36', '6.37', '6.k.1.1', '6.k.2.1', '6.k.3.1', '6.k.1.2', '6.k.2.2', '6.k.3.2', '6.k.1.3', '6.k.2.3', '6.k.3.3', '6.k.1.4', '6.k.2.4', '6.k.3.4'], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, граница найдена сравнением с английской записью, не на слух.' }),
+      ...each(['7.01', '7.02', '7.03', '7.16', '7.17', '7.18', '7.20', '7.22', '7.24', '7.26', '7.29', '7.30', '7.31', '7.32', '8.01', '8.02', '8.03'], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, граница найдена сравнением с английской записью, не на слух.' }),
+      ...each(['8.m.1.6', '8.m.2.6', '8.m.1.7', '8.m.2.7', '8.m.3.7'], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, граница найдена сравнением с английской записью, не на слух.' })
     }
   };
   const notesFor = (l, id) => [NOTES[l][id], BOTH[l][id] && { text: BOTH[l][id] }].filter(Boolean);
