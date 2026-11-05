@@ -115,7 +115,21 @@
       reflect: 'Два куска: размышление после первого тела и после костей.',
       refrain3: 'Рефрен здесь только читается, без объяснения; подробное объяснение — на странице 2 (2.01–2.13).',
       ref58: 'Чтение после первого тела: все три фразы — внутри, снаружи, внутри и снаружи.',
-      closing: 'Эта фраза здесь не читается; фрагмент — итог всех разделов о теле.'
+      closing: 'Эта фраза здесь не читается; фрагмент — итог всех разделов о теле.',
+      s9Long: 'Длинный фрагмент (7 мин): о чём раздел и почему ощущения так важны. С 2:13 идёт рассказ о джханах, здесь можно обрезать.',
+      terms12: 'Объяснение общее для 4.12–4.14, по терминам не делится и звучит один раз, здесь.',
+      termNone: 'Отдельного объяснения термина нет: общее объяснение звучит в 4.12.',
+      school17: 'Спор с другой традицией (2,5 мин) касается строк 4.17–4.19, больше всего «снаружи». Отдан первой строке; можно перенести к 4.18.',
+      sum27: 'Сама строка занимает первые 13 с, дальше почти 4 минуты итога о роли ощущений. Можно обрезать на 24:06.',
+      citta19: 'Общее рассуждение о строках 5.19–5.21 отдано первой из них, перевод поделён по строкам.',
+      split22: 'Пояснение поделено по смыслу: возникновение, затем исчезновение — 5.22; мгновенное возникновение и исчезновение — 5.24.',
+      long26: 'Второй кусок длинный (5 мин) и в записи идёт после 5.28: Гоенкаджи связывает его с этой строкой, но он касается и 5.25, и 5.28.',
+      s11Long: 'Длинный фрагмент (8 мин): что значит «дхамма» и что такое помехи. Начинается задолго до чтения строк раздела.',
+      hindWord: 'Только название помехи из перечня: этот короткий кусок звучит и внутри названия раздела (11).',
+      colNone: 'Отдельного объяснения помехи нет: всё сказанное о ней разложено по ячейкам этого столбца.',
+      rowCell: 'Это предложение объясняется только на примере первой помехи, поэтому фрагмент совпадает с первой ячейкой строки.',
+      joint14: 'Объяснение общее для 6.14–6.16, не делится и звучит один раз, здесь; в записи оно идёт после чтения 6.16.',
+      joint14see: 'Общее объяснение строк 6.14–6.16 звучит в 6.14.'
     },
     en: {
       status: { '': 'Not checked', ok: 'Correct', fix: 'Needs a fix', none: 'No explanation' },
@@ -186,7 +200,21 @@
       reflect: 'Two pieces: the reflection after the first body and after the bones.',
       refrain3: 'Here the refrain is only read, without an explanation; the detailed one is on page 2 (2.01–2.13).',
       ref58: 'The reading after the first body: all three phrases, internally, externally, both.',
-      closing: 'This phrase is not read here; the fragment sums up all the sections on the body.'
+      closing: 'This phrase is not read here; the fragment sums up all the sections on the body.',
+      s9Long: 'A long fragment (8 minutes): what the section is about and why sensations matter so much. From 3:39 it is the story of the jhānas; it could be cut there.',
+      terms12: 'The explanation is shared by 4.12–4.14, cannot be split by term and plays once, here.',
+      termNone: 'This term has no explanation of its own: the shared one plays in 4.12.',
+      school17: 'The dispute with another school (2.5 minutes) concerns lines 4.17–4.19, “externally” most of all. It went to the first line; it could move to 4.18.',
+      sum27: 'The line itself is the first 14 s, then 3.7 minutes sum up the role of sensations. It could be cut at 24:10.',
+      citta19: 'The general talk on lines 5.19–5.21 went to the first of them; the translation is split by line.',
+      split22: 'The explanation is split by meaning: arising, then passing away is 5.22; instant arising and passing away is 5.24.',
+      long26: 'The second piece is long (5 minutes) and comes after 5.28 in the recording: Goenkaji links it to this line, but it also touches 5.25 and 5.28.',
+      s11Long: 'A long fragment (9.5 minutes): what “dhamma” means and what the hindrances are. It starts long before the lines of the section are read.',
+      hindWord: 'Only the name of the hindrance from the list: this short piece also plays inside the title of section (11).',
+      colNone: 'This hindrance has no explanation of its own: all that is said about it is spread over the cells of this column.',
+      rowCell: 'This sentence is explained only on the first hindrance, so the fragment is the same as the first cell of the row.',
+      joint14: 'The explanation is shared by 6.14–6.16, cannot be split and plays once, here; in the recording it comes after the reading of 6.16.',
+      joint14see: 'The explanation shared by lines 6.14–6.16 plays in 6.14.'
     }
   };
   const T = () => UI[lang()] || UI.en;
@@ -210,6 +238,10 @@
     n['3.56'] = n['3.57'] = t.reflect + ' ' + t.shared('3.56, 3.57');
     n['3.58'] = t.ref58 + ' ' + t.refrain3;
     for (let k = 59; k <= 67; k++) n['3.' + k] = t.refrain3;
+    Object.assign(n, { s9: t.s9Long, '4.12': t.terms12, '4.13': t.termNone, '4.14': t.termNone, '4.17': t.school17, '4.27': t.sum27,
+      '5.19': t.citta19, '5.22': t.split22, '5.24': t.split22, '5.26': t.long26, s11: t.s11Long, '6.14': t.joint14, '6.15': t.joint14see, '6.16': t.joint14see });
+    for (let k = 34; k <= 38; k++) n['5.' + k] = t.hindWord;
+    for (let k = 1; k <= 5; k++) { n['6.0' + k] = t.colNone; n['6.n.' + k + '.1'] = t.rowCell; n['6.' + String(k + 5).padStart(2, '0')] = t.rowCell; }
     return n;
   }
   const BOTH = { ru: bothNotes(UI.ru), en: bothNotes(UI.en) };
@@ -219,7 +251,9 @@
     en: {
       ...each(range(2, 17, 19), { first: 1, text: 'Check first: the Pali of these lines is not in the transcript; the boundaries follow the pauses.' }),
       ...each([...range(3, 49, 51), '3.54', '3.55'], { first: 1, text: 'Check first: the Pali of these lines is not in the transcript; the boundaries follow the pauses.' }),
-      ...each(['3.56', '3.57'], { first: 1, text: 'The Pali at the start of the second piece is not in the transcript; it is placed by the pauses.' })
+      ...each(['3.56', '3.57'], { first: 1, text: 'The Pali at the start of the second piece is not in the transcript; it is placed by the pauses.' }),
+      ...each(['5.02', '5.06', '5.08', '5.23'], { first: 1, text: 'Check first: this Pali reading is not in the transcript; it was identified from the sound, not by ear.' }),
+      ...each(['6.18', '6.19'], { first: 1, text: 'Check first: the boundary between 6.18 and 6.19 sits in a very short pause.' })
     },
     ru: {
       '0': { first: 1, text: 'Распознавание потеряло начало (0:03–0:30); начало фрагмента поставлено по записи.' },
@@ -232,7 +266,12 @@
       '3.30': { text: 'В русском переводе перечня vasā (жировая влага) пропущена: только слово на пали.' },
       ...each(['3.41', '3.42'], { first: 1, text: 'Распознавание потеряло перевод «paṭhavīdhātu…» (31:05–31:17): граница 3.41/3.42 поставлена по паузе.' }),
       ...each([...range(3, 49, 55), '3.58', ...range(3, 59, 67)], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, границы поставлены по английской записи (то же чтение Гоенкаджи) и по паузам.' }),
-      ...each(['3.56', '3.57'], { first: 1, text: 'Начало второго куска (чтение на пали) поставлено по английской записи и по паузам.' })
+      ...each(['3.56', '3.57'], { first: 1, text: 'Начало второго куска (чтение на пали) поставлено по английской записи и по паузам.' }),
+      '4.11': { first: 1, text: 'Начало чтения на пали срезано уже в самом дубляже (около 0,4 с), границей это не исправить.' },
+      ...each(['5.02', '5.06', '5.08', '5.23', '6.n.1.4'], { first: 1, text: 'Проверить первым: это чтение на пали не расшифровано, место найдено сравнением с английской записью, не на слух.' }),
+      '5.07': { first: 1, text: 'Внутри (31:02–31:04) похоже остался обрывок английской речи Гоенкаджи: так в самом дубляже. На слух не проверено.' },
+      '6.16': { text: 'В русской записи здесь только короткое чтение, без «dhammesu viharati».' },
+      ...each(['6.18', '6.19'], { first: 1, text: 'Проверить первым: граница 6.18/6.19 стоит в очень короткой паузе (0,08 с).' })
     }
   };
   const notesFor = (l, id) => [NOTES[l][id], BOTH[l][id] && { text: BOTH[l][id] }].filter(Boolean);
