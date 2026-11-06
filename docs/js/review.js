@@ -142,7 +142,6 @@
       long12: 'Длинный фрагмент (3,3 мин): три вида влечения.',
       s17Own: 'Название объясняется после всего раздела: страдание возникает одновременно с влечением.',
       phrase16: 'Два куска: объяснение после первого слова перечня и само чтение этой фразы.',
-      noCell15: 'В «Слушать страницу» ячейки не звучат, поэтому весь перечень слышен только по клику на ячейку.',
       firstCell3: 'В первую ячейку вошло объяснение всего ряда: шесть видов сознания (2,6 мин).',
       firstRow: 'В первую ячейку вошло вступление к ряду, в последнюю — повтор общей фразы после перечня.',
       colNoneM: 'Отдельного объяснения нет: слово звучит в ячейках первых рядов.',
@@ -263,7 +262,6 @@
       long12: 'A long fragment (3.5 minutes): the three kinds of craving.',
       s17Own: 'The title is explained after the whole section: suffering arises together with craving.',
       phrase16: 'Two pieces: the explanation after the first word of the list and the reading of this phrase itself.',
-      noCell15: 'Listen to the page does not play the cells, so the whole list is heard only by clicking a cell.',
       firstCell3: 'The first cell includes the explanation of the whole row: the six kinds of consciousness (2.7 minutes).',
       firstRow: 'The first cell includes the introduction to the row, the last one the repeated common phrase after the list.',
       colNoneM: 'No explanation of its own: the word is heard in the cells of the first rows.',
@@ -319,7 +317,7 @@
     ['7.04', '7.06', '7.08', '7.10', '7.12', '7.14'].forEach(k => { n[k] = t.word7; });
     ['7.19', '7.21', '7.23', '7.25', '7.27'].forEach(k => { n[k] = t.sense7; });
     for (let r = 1; r <= 4; r++) n['8.m.' + r + '.1'] = n['8.' + (10 + r)] = t.rowCellB;
-    Object.assign(n, { s15: t.s15Parts, s16: t.s16Sum, s17: t.s17Own, s18: t.noTitle, s19: t.noTitle, '9.03': t.byadhi, '9.12': t.long12, '9.14': t.long14, '9.15': t.noCell15, '9.16': t.phrase16, '10.05': t.noCell15, '10.07': t.details07, '9.m.3.1': t.firstCell3, '11.09': t.twoPath, '11.10': t.twoPath, '11.48': t.long48, '11.49': t.long49, '11.51': t.noRead, '11.52': t.noRead });
+    Object.assign(n, { s15: t.s15Parts, s16: t.s16Sum, s17: t.s17Own, s18: t.noTitle, s19: t.noTitle, '9.03': t.byadhi, '9.12': t.long12, '9.14': t.long14, '9.16': t.phrase16, '10.07': t.details07, '9.m.3.1': t.firstCell3, '11.09': t.twoPath, '11.10': t.twoPath, '11.48': t.long48, '11.49': t.long49, '11.51': t.noRead, '11.52': t.noRead });
     ['8.19', '8.20', '8.21', '8.22'].forEach(k => { n[k] = t.truth3; });
     ['9.02', '9.04', '9.05', '9.06', '9.07', '9.08', '9.09'].forEach(k => { n[k] = t.niddesa; });
     ['11.13', '11.14', '11.15', '11.16', '11.39'].forEach(k => { n[k] = t.wisdom; });

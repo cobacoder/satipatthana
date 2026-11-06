@@ -514,6 +514,24 @@
 
   let page = 1;
   let lines = [], seq = [];
+  // The order in which a page is read. A table of templates (6.n, 6.k, 8.m) goes column by column, as the brochure asks:
+  // every sentence with the first term, then with the second, and so on; the sentence itself comes before its first cell.
+  function readingOrder(all) {
+    const out = [], seen = new Set();
+    all.forEach(l => {
+      if (seen.has(l)) return;
+      const tb = l.closest('.rowh, .cell') && l.closest('.mat-tbl');
+      if (!tb) { out.push(l); seen.add(l); return; }
+      const rows = [...tb.querySelectorAll('tr')].filter(tr => tr.querySelector('.cell'));
+      const cols = rows[0].querySelectorAll('.cell').length;
+      for (let c = 0; c < cols; c++) rows.forEach(tr => {
+        const list = c === 0 ? [tr.querySelector('.rowh .ln')] : [];
+        list.push(tr.querySelectorAll('.cell')[c]);
+        list.filter(Boolean).forEach(x => { out.push(x); seen.add(x); });
+      });
+    });
+    return out;
+  }
 
   function renderText() {
     document.body.classList.toggle('script-dev', script === 'dev');
@@ -557,8 +575,9 @@
     page = n;
     document.querySelectorAll('.page').forEach(s => { s.hidden = +s.dataset.page !== n; });
     const sec = $('p' + n);
-    lines = [...sec.querySelectorAll('.ln')];
-    seq = lines.filter(l => !l.classList.contains('cell'));
+    const all = [...sec.querySelectorAll('.ln')];
+    seq = all.filter(l => !l.classList.contains('cell'));
+    lines = readingOrder(all);
     pager.querySelectorAll('.pg').forEach(a => {
       if (+a.dataset.page === n) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -617,7 +636,14 @@
   }
   // page mode plays the lines strictly in their order, even when a passage repeats one played before;
   // it skips only a line that has no audio yet, once this language has any audio
-  const skipped = el => !rawCue(el) && Object.keys(CUES[lang] || {}).length > 0;
+  const cueKey = el => { const c = rawCue(el); return c ? JSON.stringify(c) : ''; };
+  // the sentence of a matrix row, when it plays the same audio as the first cell of its row
+  const repeatsCell = el => {
+    const tr = el.closest('.rowh') && el.closest('tr');
+    const first = tr && tr.querySelector('.cell');
+    return !!first && !!cueKey(el) && cueKey(el) === cueKey(first);
+  };
+  const skipped = el => repeatsCell(el) || (!rawCue(el) && Object.keys(CUES[lang] || {}).length > 0);
   function unitText(el) {
     if (el.dataset.full) return translit(el.dataset.full, 'pi', null, true);
     return [...el.querySelectorAll('.n, .t')].map(x =>
@@ -768,10 +794,14 @@
     updatePlayer();
   }
 
-  // the next or previous line in reading order; matrix cells are skipped
+  // the next or previous line in reading order, cells included; a line that only repeats the audio it follows is passed over
   function neighborOf(el, dir) {
     const i = lines.indexOf(el);
-    for (let k = i + dir; k >= 0 && k < lines.length; k += dir) if (!lines[k].classList.contains('cell')) return lines[k];
+    for (let k = i + dir; k >= 0 && k < lines.length; k += dir) {
+      const x = lines[k];
+      if (repeatsCell(x) || (cueKey(x) && cueKey(x) === cueKey(el))) continue;
+      return x;
+    }
     return dir < 0 && page === 1 && el !== titleLn ? titleLn : null;
   }
   const neighbor = dir => neighborOf(cur, dir);
@@ -822,10 +852,11 @@
     const trP = trText ? mk('p', null, trText) : null;
     if (trP) trP.lang = tr[lang] ? lang : 'en';
     $('pl-tr').replaceChildren(...(trP ? [trP] : []));
-    const si = seq.indexOf(cur);
+    const shown = lines.filter(l => !repeatsCell(l));
+    const si = shown.indexOf(repeatsCell(cur) ? cur.closest('tr').querySelector('.cell') : cur);
     const secN = /^s(\d+)$/.exec(cur.dataset.id);
     $('pl-count').textContent = cur === titleLn ? L.line0 : secN ? L.secLine.replace('{n}', secN[1])
-      : si >= 0 ? L.lineOf.replace('{n}', si + 1).replace('{N}', seq.length) : L.cell;
+      : si >= 0 ? L.lineOf.replace('{n}', si + 1).replace('{N}', shown.length) : L.cell;
     $('pl-note').textContent = cueFor(cur) ? '' : L.demo;
     $('pl-prev').disabled = !neighbor(-1);
     $('pl-next').disabled = !neighbor(1);
@@ -918,7 +949,7 @@
   $('play-all').addEventListener('click', () => {
     if (pageMode && playing) pause();
     else if (pageMode && cur) resume();
-    else { pageMode = true; start([...(page === 1 ? [titleLn] : []), ...seq].find(l => !skipped(l)) || seq[0], true); }
+    else { pageMode = true; start([...(page === 1 ? [titleLn] : []), ...lines].find(l => !skipped(l)) || lines[0], true); }
   });
   players.forEach(a => a.addEventListener('ended', () => {
     if (a !== audio || !playing) return;
