@@ -48,7 +48,7 @@
     ru: {
       status: { '': 'Не проверено', ok: 'Верно', fix: 'Нужна правка', none: 'Пояснения нет' },
       day: n => 'день ' + n,
-      days: { 'day7-qa1': 'день 7, вопросы', 'day8-qa2': 'день 8, вопросы', 'day9-closing': 'день 9, заключение' },
+      days: { 'day7-qa1': 'день 7', 'day8-qa2': 'день 8, вопросы', 'day9-closing': 'день 9, заключение' },
       locale: 'ru',
       num: x => String(x).replace('.', ','),
       title: 'Проверка таймкодов',
@@ -133,6 +133,25 @@
       s14Parts: 'Название дано двумя кусками: вступление и итог после семи факторов; сами факторы — в 8.04–8.10.',
       long08: 'Длинный фрагмент (10,5 мин). С 52:47 идёт отступление о нейтральных ощущениях и разных традициях (примерно до 57:18); можно вынести или обрезать.',
       rowCellB: 'Фрагмент совпадает с первой ячейкой строки: разбор сделан на примере сати.',
+      s15Parts: 'Название и то, что объясняет весь раздел: первая проповедь и пять друзей Будды. Три куска из разных мест беседы.',
+      truth3: 'Два-три куска: чтение строки, затем разбор этой истины в трёх её аспектах (всего их двенадцать).',
+      s16Sum: 'Само название не объясняется; дан итог после всего раздела: как страдание переживается на практике (7 мин). Можно убрать.',
+      niddesa: 'Два куска: короткое чтение и подробный разбор из того же раздела. Самих определений в брошюре нет.',
+      byadhi: 'Два куска. В первый входит и «болезнь — это страдание»: этих слов на странице нет.',
+      long14: 'Длинный фрагмент (3,8 мин): что такое лока, история Рохиты, лока внутри тела.',
+      long12: 'Длинный фрагмент (3,3 мин): три вида влечения.',
+      s17Own: 'Название объясняется после всего раздела: страдание возникает одновременно с влечением.',
+      phrase16: 'Два куска: объяснение после первого слова перечня и само чтение этой фразы.',
+      noCell15: 'В «Слушать страницу» ячейки не звучат, поэтому весь перечень слышен только по клику на ячейку.',
+      firstCell3: 'В первую ячейку вошло объяснение всего ряда: шесть видов сознания (2,6 мин).',
+      firstRow: 'В первую ячейку вошло вступление к ряду, в последнюю — повтор общей фразы после перечня.',
+      colNoneM: 'Отдельного объяснения нет: слово звучит в ячейках первых рядов.',
+      details07: 'После чтения идут 2 минуты о том, что такие подробности доступны только на очень высоких стадиях.',
+      twoPath: 'Два куска: слово из перечня и подробный разбор, который идёт уже после 11.47. Отдельных строк для него в брошюре нет.',
+      wisdom: 'Два куска: чтение и объяснение стоят в записи раздельно.',
+      long48: 'Длинный фрагмент (9 мин): от семи лет до семи дней, почему срок разный, и о начальных практиках. Можно разделить или обрезать.',
+      long49: 'Два куска, между ними чтение 11.50. Второй длинный (7 мин): закон природы, один для всех.',
+      noRead: 'Этой строки в беседе нет.',
       s9Long: 'Длинный фрагмент (7 мин): о чём раздел и почему ощущения так важны. С 2:13 идёт рассказ о джханах, здесь можно обрезать.',
       terms12: 'Объяснение общее для 4.12–4.14, по терминам не делится и звучит один раз, здесь.',
       termNone: 'Отдельного объяснения термина нет: общее объяснение звучит в 4.12.',
@@ -151,7 +170,7 @@
     en: {
       status: { '': 'Not checked', ok: 'Correct', fix: 'Needs a fix', none: 'No explanation' },
       day: n => 'day ' + n,
-      days: { 'day7-qa1': 'day 7, questions', 'day8-qa2': 'day 8, questions', 'day9-closing': 'day 9, closing' },
+      days: { 'day7-qa1': 'day 7', 'day8-qa2': 'day 8, questions', 'day9-closing': 'day 9, closing' },
       locale: 'en-GB',
       num: x => String(x),
       title: 'Timecode review',
@@ -235,6 +254,25 @@
       s14Parts: 'The title comes in two pieces: the introduction and the summing up after the seven factors; the factors themselves are in 8.04–8.10.',
       long08: 'A long fragment (9.5 minutes). From 57:31 there is a digression on neutral sensations and different traditions (to about 61:32); it could be moved or cut.',
       rowCellB: 'The fragment is the same as the first cell of the row: the discussion is made on sati.',
+      s15Parts: 'The title and what explains the whole section: the first sermon and the five friends of the Buddha. Three pieces from different places of the talk.',
+      truth3: 'Two or three pieces: the reading of the line, then this truth in its three aspects (twelve in all).',
+      s16Sum: 'The title itself is not explained; this is the summing up after the whole section: how suffering is experienced in practice (7 minutes). It could be removed.',
+      niddesa: 'Two pieces: the short reading and the detailed discussion from the same section. The definitions themselves are not in the brochure.',
+      byadhi: 'Two pieces. The first also has “disease is suffering”: those words are not on the page.',
+      long14: 'A long fragment (4 minutes): what loka is, the story of Rohita, loka inside the body.',
+      long12: 'A long fragment (3.5 minutes): the three kinds of craving.',
+      s17Own: 'The title is explained after the whole section: suffering arises together with craving.',
+      phrase16: 'Two pieces: the explanation after the first word of the list and the reading of this phrase itself.',
+      noCell15: 'Listen to the page does not play the cells, so the whole list is heard only by clicking a cell.',
+      firstCell3: 'The first cell includes the explanation of the whole row: the six kinds of consciousness (2.7 minutes).',
+      firstRow: 'The first cell includes the introduction to the row, the last one the repeated common phrase after the list.',
+      colNoneM: 'No explanation of its own: the word is heard in the cells of the first rows.',
+      details07: 'After the reading come 2 minutes on such details being open only at very high stages.',
+      twoPath: 'Two pieces: the word from the list and the detailed discussion, which comes after 11.47. The brochure has no lines of its own for it.',
+      wisdom: 'Two pieces: the reading and the explanation stand apart in the recording.',
+      long48: 'A long fragment (8 minutes): from seven years to seven days, why the time differs, and on beginners’ practices. It could be split or cut.',
+      long49: 'Two pieces with the reading of 11.50 between them. The second is long (6 minutes): the law of nature, one for all.',
+      noRead: 'This line is not in the talk.',
       s9Long: 'A long fragment (8 minutes): what the section is about and why sensations matter so much. From 3:39 it is the story of the jhānas; it could be cut there.',
       terms12: 'The explanation is shared by 4.12–4.14, cannot be split by term and plays once, here.',
       termNone: 'This term has no explanation of its own: the shared one plays in 4.12.',
@@ -281,12 +319,18 @@
     ['7.04', '7.06', '7.08', '7.10', '7.12', '7.14'].forEach(k => { n[k] = t.word7; });
     ['7.19', '7.21', '7.23', '7.25', '7.27'].forEach(k => { n[k] = t.sense7; });
     for (let r = 1; r <= 4; r++) n['8.m.' + r + '.1'] = n['8.' + (10 + r)] = t.rowCellB;
+    Object.assign(n, { s15: t.s15Parts, s16: t.s16Sum, s17: t.s17Own, s18: t.noTitle, s19: t.noTitle, '9.03': t.byadhi, '9.12': t.long12, '9.14': t.long14, '9.15': t.noCell15, '9.16': t.phrase16, '10.05': t.noCell15, '10.07': t.details07, '9.m.3.1': t.firstCell3, '11.09': t.twoPath, '11.10': t.twoPath, '11.48': t.long48, '11.49': t.long49, '11.51': t.noRead, '11.52': t.noRead });
+    ['8.19', '8.20', '8.21', '8.22'].forEach(k => { n[k] = t.truth3; });
+    ['9.02', '9.04', '9.05', '9.06', '9.07', '9.08', '9.09'].forEach(k => { n[k] = t.niddesa; });
+    ['11.13', '11.14', '11.15', '11.16', '11.39'].forEach(k => { n[k] = t.wisdom; });
+    [9, 10].forEach(p => { for (let c = 1; c <= 6; c++) n[p + '.m.h' + c] = t.colNoneM; for (let r = 1; r <= 10; r++) { if (n[p + '.m.' + r + '.1'] === undefined) n[p + '.m.' + r + '.1'] = t.firstRow; if (n[p + '.m.' + r + '.6'] === undefined) n[p + '.m.' + r + '.6'] = t.firstRow; } });
     for (let k = 34; k <= 38; k++) n['5.' + k] = t.hindWord;
     for (let k = 1; k <= 5; k++) { n['6.0' + k] = t.colNone; n['6.n.' + k + '.1'] = t.rowCell; n['6.' + String(k + 5).padStart(2, '0')] = t.rowCell; }
     return n;
   }
   const BOTH = { ru: bothNotes(UI.ru), en: bothNotes(UI.en) };
   const each = (ids, note) => Object.fromEntries(ids.map(id => [id, note]));
+  const cellsOf = (p, rows) => rows.flatMap(r => [1, 2, 3, 4, 5, 6].map(c => p + '.m.' + r + '.' + c));
   const range = (p, a, b) => Array.from({ length: b - a + 1 }, (_, i) => p + '.' + String(a + i).padStart(2, '0'));
   const NOTES = {
     en: {
@@ -296,7 +340,9 @@
       ...each(['5.02', '5.06', '5.08', '5.23'], { first: 1, text: 'Check first: this Pali reading is not in the transcript; it was identified from the sound, not by ear.' }),
       ...each(['6.18', '6.19'], { first: 1, text: 'Check first: the boundary between 6.18 and 6.19 sits in a very short pause.' }),
       ...each(['6.23', '6.24', '6.35', '6.k.1.1', '7.02', '7.03', '7.30'], { first: 1, text: 'Check first: this Pali reading is not in the transcript; the boundaries follow the pauses.' }),
-      ...each(['8.m.2.4', '8.m.3.4', '8.m.1.7', '8.m.2.7', '8.m.3.7'], { first: 1, text: 'Check first: these readings run with hardly a pause and are not in the transcript; the boundaries follow the loudness.' })
+      ...each(['8.m.2.4', '8.m.3.4', '8.m.1.7', '8.m.2.7', '8.m.3.7'], { first: 1, text: 'Check first: these readings run with hardly a pause and are not in the transcript; the boundaries follow the loudness.' }),
+      ...each(['8.16', '8.17', '8.18', '8.19', '8.20', '8.21', '8.22', '9.15', '11.12', '11.13', '11.14', '11.15', '11.16', '11.24', '11.25', '11.26', '11.27', '11.29', '11.30', '11.31', '11.32'], { first: 1, text: 'Check first: this Pali reading is not in the transcript; the boundaries follow the pauses.' }),
+      ...each([...cellsOf(9, [2, 8]), ...cellsOf(10, [4, 5, 6, 7, 8, 9])], { first: 1, text: 'Check first: this row is not in the transcript; it is divided into six words by the pauses and evenly, not by ear.' })
     },
     ru: {
       '0': { first: 1, text: 'Распознавание потеряло начало (0:03–0:30); начало фрагмента поставлено по записи.' },
@@ -314,6 +360,8 @@
       ...each(['5.02', '5.06', '5.08', '5.23', '6.n.1.4'], { first: 1, text: 'Проверить первым: это чтение на пали не расшифровано, место найдено сравнением с английской записью, не на слух.' }),
       '5.07': { first: 1, text: 'Внутри (31:02–31:04) похоже остался обрывок английской речи Гоенкаджи: так в самом дубляже. На слух не проверено.' },
       '6.16': { text: 'В русской записи здесь только короткое чтение, без «dhammesu viharati».' },
+      ...each(['8.16', '8.17', '8.18', '8.19', '8.20', '8.21', '8.22', '9.15', '9.16', '10.01', '10.02', '10.06', '11.01', '11.02', '11.03', '11.04', '11.05', '11.06', '11.07', '11.08', '11.09', '11.10', '11.11', '11.12', '11.13', '11.14', '11.15', '11.16', '11.18', '11.19', '11.20', '11.21', '11.22', '11.23', '11.24', '11.25', '11.26', '11.27', '11.29', '11.34', '11.35', '11.36', '11.37', '11.38', '11.39', '11.40', '11.41', '11.42', '11.43', '11.44', '11.45', '11.46', '11.47', '11.50'], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, граница найдена сравнением с английской записью, не на слух.' }),
+      ...each([...cellsOf(9, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), ...cellsOf(10, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])], { first: 1, text: 'Проверить первым: слова ряда перенесены с английской записи со сдвигом на весь ряд, отдельно на слух не проверялись.' }),
       ...each(['6.18', '6.19'], { first: 1, text: 'Проверить первым: граница 6.18/6.19 стоит в очень короткой паузе (0,08 с).' }),
       ...each(['6.22', '6.23', '6.24', '6.35', '6.36', '6.37', '6.k.1.1', '6.k.2.1', '6.k.3.1', '6.k.1.2', '6.k.2.2', '6.k.3.2', '6.k.1.3', '6.k.2.3', '6.k.3.3', '6.k.1.4', '6.k.2.4', '6.k.3.4'], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, граница найдена сравнением с английской записью, не на слух.' }),
       ...each(['7.01', '7.02', '7.03', '7.16', '7.17', '7.18', '7.20', '7.22', '7.24', '7.26', '7.29', '7.30', '7.31', '7.32', '8.01', '8.02', '8.03'], { first: 1, text: 'Проверить первым: пали здесь не расшифровано, граница найдена сравнением с английской записью, не на слух.' }),
